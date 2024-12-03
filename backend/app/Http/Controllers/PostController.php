@@ -51,6 +51,33 @@ class PostController extends Controller
         return response()->json(['post' => $post]);
     }
 
+    public function getPostsByHashtag(int $id): JsonResponse
+    {
+        $post = Post::query()
+            ->selectRaw('posts.*, images.path as image_path, tags.name as tag_name')
+            ->join('images', 'images.post_id', '=', 'posts.id')
+            ->join('post_tag', 'post_tag.post_id', '=', 'posts.id')
+            ->join('tags', 'tags.id', '=', 'post_tag.tag_id')
+            ->where('tags.id', $id)
+            ->get();
+
+        return response()->json($post);
+    }
+
+    public function getNotPopularPosts(): JsonResponse
+    {
+        $post = Post::query()
+            ->selectRaw('posts.*, views - likes as views_likes, images.path as image_path')
+            ->join('images', 'images.post_id', '=', 'posts.id')
+            ->orderBy('views_likes')
+            ->orderBy('created_at')
+            ->skip(6)
+            ->take(10)
+            ->get();
+
+        return response()->json($post);
+    }
+
     public function getPostDetails(int $id): JsonResponse
     {
         $posts = DB::table('posts as p')
@@ -113,19 +140,34 @@ class PostController extends Controller
             ->selectRaw('posts.*, max(images.path) as path')
             ->orderBy('posts.views', 'desc')
             ->groupBy('posts.id')
-            ->limit(10)
+            ->limit(5)
             ->get();
+        return response()->json(['posts' => $post]);
+    }
+
+    public function getPopularPosts(): JsonResponse
+    {
+        $post = Post::query()
+            ->selectRaw('*, views + likes as views_likes')
+            ->orderByDesc('views_likes')
+            ->orderByDesc('created_at')
+            ->take(6)
+            ->get();
+
         return response()->json(['posts' => $post]);
     }
 
     public function getFeaturedPosts(): JsonResponse
     {
         $post = Post::query()
-            ->orderBy('views', 'desc')
-            ->orderBy('likes', 'desc')
+            ->selectRaw('posts.*, views - likes as views_likes, images.path as image_path')
+            ->join('images', 'images.post_id', '=', 'posts.id')
+            ->orderBy('views_likes')
+            ->orderBy('created_at')
             ->take(6)
             ->get();
-        return response()->json(['posts' => $post]);
+
+        return response()->json($post);
     }
 
     public function getPostByTopicId(int $topicId): JsonResponse
@@ -162,7 +204,7 @@ class PostController extends Controller
             ->join('posts', 'images.post_id', '=', 'posts.id')
             ->select('images.path', 'posts.*')
             ->orderBy('posts.created_at', 'desc')
-            ->limit(10)
+            ->limit(5)
             ->get();
         return response()->json($post);
     }

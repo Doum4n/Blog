@@ -6,7 +6,7 @@ const status = ({id, name, content, image}) => {
 
     const style = {
         height: '200px',
-        width: '100px',
+        width: '150px',
         border: '1px solid black',
         justifyContent: 'center',
         alignItems: 'flex-end',
@@ -16,6 +16,7 @@ const status = ({id, name, content, image}) => {
         bottom: '0px',
         marginBottom: '10px',
         overflowX: 'auto',
+        borderRadius: '10px',
     }
 
     const onStatus_Click = () => {

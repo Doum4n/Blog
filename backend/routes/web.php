@@ -49,7 +49,12 @@ Route::middleware([CorsMiddleware::class])->group(function () {
     Route::get('/post/{id}/likes', [PostController::class, 'getLikes']);
     Route::get('/post/user/{id}', [PostController::class, 'getPostByUuid']);
     Route::get('/post/most-viewed', [PostController::class, 'getMostViewedPosts']);
+    Route::get('/post/Popular', [PostController::class, 'getPopularPosts']);
     Route::get('/post/Featured', [PostController::class, 'getFeaturedPosts']);
+
+    Route::get('posts/not-popular', [PostController::class, 'getNotPopularPosts']);
+
+    Route::get('posts/hashtag/{id}', [PostController::class, 'getPostsByHashtag']);
     Route::get('/post/topic/{id}', [PostController::class, 'getPostByTopicId']);
     Route::get('/post/topic/{id}/all', [PostController::class, 'getPostByTopicId_All']);
     Route::get('/posts/recent', [PostController::class, 'getRecentPosts']);

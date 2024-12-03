@@ -80,9 +80,16 @@ function Home() {
 
   const [mostViewPosts, setMostViewPosts] = useState([]);
   const [FeaturedPosts, setFeaturedPosts] = useState([]);
+  const [PopularPosts, setPopularPosts] = useState([]);
   const [topics, setTopics] = useState([]);
   const [postsByTopic, setPostsByTopic] = useState([]);
   const [userId, setUserId] = useState({});
+  const [statuses, setStatuses] = useState([]);
+  const [RecentPosts, setRecentPosts] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [postNotFeaturedPosts, setPostNotFeaturedPosts] = useState([]);
+  const [postsByHashtags, setPostsByHashtags] = useState([]);
 
   useEffect(() => {
     try {
@@ -97,103 +104,50 @@ function Home() {
   });
 
   useEffect(() => {
-    fetch('http://0.0.0.0/post/most-viewed')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
-      .then(data => {
-        setMostViewPosts(data.posts);
-        console.log('succes get most viewed post');
-      })
-      .catch(error => {
-        console.error('There was a problem with the fetch operation:', error);
-      });
-  }, []);
-
-  useEffect(() => {
-    fetch('http://0.0.0.0/post/Featured')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
-      .then(data => {
-        setFeaturedPosts(data.posts);
-        console.log('succes get most Featured post');
-      })
-      .catch(error => {
-        console.error('There was a problem with the fetch operation:', error);
-      });
-  }, []);
-
-  const [RecentPosts, setRecentPosts] = useState([]);
-
-  useEffect(() => {
-    fetch('http://0.0.0.0/posts/recent')
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          return response.json();
+    Promise.all([
+      fetch('http://0.0.0.0/post/most-viewed'),
+      fetch('http://0.0.0.0/post/Popular'),
+      fetch('http://0.0.0.0/post/Featured'),
+      fetch('http://0.0.0.0/posts/not-popular'),
+      fetch('http://0.0.0.0/posts/recent'),
+      fetch('http://0.0.0.0/topics'),
+      fetch('http://0.0.0.0/post/topic/5'),
+      fetch('http://0.0.0.0/status/index'),
+      fetch('http://0.0.0.0/users/index'),
+        fetch('http://0.0.0.0/posts/hashtag/1'),
+    ])
+        .then(([mostViewedRes, PopularRes, featuredRes, notFeaturedRes, recentRes, topicsRes, postsByTopicRes, statusesRes, usersRes, postsbyHashTagRes]) => {
+          return Promise.all([
+            mostViewedRes.json(),
+            PopularRes.json(),
+            featuredRes.json(),
+            notFeaturedRes.json(),
+            recentRes.json(),
+            topicsRes.json(),
+            postsByTopicRes.json(),
+            statusesRes.json(),
+            usersRes.json(),
+            postsbyHashTagRes.json(),
+          ]);
         })
-        .then(data => {
-          setRecentPosts(data);
+        .then(([mostViewedData, popularData, featuredData, notFeaturedData, recentData, topicsData, postsByTopicData, statusesData, usersData, postsbyHashTagData]) => {
+          setMostViewPosts(mostViewedData.posts);
+          setPopularPosts(popularData.posts);
+          setFeaturedPosts(featuredData);
+          setPostNotFeaturedPosts(notFeaturedData);
+          setRecentPosts(recentData);
+          setTopics(topicsData);
+          setPostsByTopic(postsByTopicData);
+          setStatuses(statusesData.data);
+          setUsers(usersData.data);
+          setPostsByHashtags(postsbyHashTagData)
+
+          setIsLoading(false);
         })
         .catch(error => {
           console.error('There was a problem with the fetch operation:', error);
-        });
-  }, []);
 
-  useEffect(() => {
-    fetch('http://0.0.0.0/topics')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
-      .then(data => {
-        setTopics(data);
-      })
-      .catch(error => {
-        console.error('There was a problem with the fetch operation:', error);
-      });
-  }, []);
-
-  useEffect(() => {
-    fetch('http://0.0.0.0/post/topic/5')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
-      .then(data => {
-        setPostsByTopic(data);
-      })
-      .catch(error => {
-        console.error('There was a problem with the fetch operation:', error);
-      });
-  }, []);
-
-  const [statuses, setStatuses] = useState([]);
-  useEffect(() => {
-    fetch('http://0.0.0.0/status/index')
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          return response.json();
-        })
-        .then(data => {
-          setStatuses(data.data);
-        })
-        .catch(error => {
-          console.error('There was a problem with the fetch operation:', error);
+          setIsLoading(false);
         });
   }, []);
 
@@ -282,7 +236,7 @@ function Home() {
       <Container>
         <Row>
           <div style={{display: 'flex', flexDirection: 'row', gap: '10px'}}>
-            <div onClick={() => handleOpen()} className="bg-secondary d-flex justify-content-center align-items-center" style={{height: '200px', width: '100px'}}>
+            <div onClick={() => handleOpen()} className="bg-secondary d-flex justify-content-center align-items-center" style={{height: '200px', width: '150px', borderRadius: '10px'}} >
               <h1 style={{fontSize: '40px'}}>
                 +
               </h1>
@@ -344,27 +298,6 @@ function Home() {
                 </Col>
               ))}
             </Row>
-
-            {/* //Featured Posts */}
-            {/*<Row>*/}
-            {/*  <h2 className='mb-4'>Popular</h2>*/}
-            {/*  {FeaturedPosts.map((post) => {*/}
-            {/*    return (<Col md={6} className='mb-3' style={{ float: 'left' }} key={post.id} onClick={() => PopularHandlerClick(post.id)}>*/}
-            {/*      <Row>*/}
-            {/*        <Col md="auto" className='d-flex align-items-center'>*/}
-            {/*          <h2><b>#{index++}</b></h2>*/}
-            {/*        </Col>*/}
-            {/*        <Col className='d-flex align-items-center'>*/}
-            {/*          <div style={{ width: '95%', border: 'thin solid black', padding: '10px', borderRadius: '5px' }}>*/}
-            {/*            <h4>{post.title}</h4>*/}
-            {/*            <h4>{post.text}</h4>*/}
-            {/*          </div>*/}
-            {/*        </Col>*/}
-            {/*      </Row>*/}
-            {/*    </Col>)*/}
-            {/*  })}*/}
-            {/*</Row>*/}
-            {/* // */}
 
             {/* //Topics */}
             <Divider/>
@@ -428,9 +361,10 @@ function Home() {
             </Row>
             {/* // */}
 
+            {/*FeaturedPosts*/}
             <Row>
               <h2 className='mb-4'>Popular</h2>
-              {FeaturedPosts.map((post) => {
+              {PopularPosts.map((post) => {
                 return (<Col md={6} className='mb-3' style={{ float: 'left' }} key={post.id} onClick={() => PopularHandlerClick(post.id)}>
                   <Row>
                     <Col md="auto" className='d-flex align-items-center'>
@@ -446,11 +380,84 @@ function Home() {
                 </Col>)
               })}
             </Row>
+            {/**/}
+
+            <Divider/>
+
+            {/*<Row>*/}
+              <h2>Featured Posts</h2>
+            {isLoading ? "Loading..." : FeaturedPosts.length > 0 ? (
+                    <div style={{display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center', backgroundColor: 'gray', padding: '20px', paddingTop: '20px'}}>
+                      <img src={FeaturedPosts[0].image_path} alt={post.title} style={{width: '60%'}}/>
+                      {FeaturedPosts[0].title}
+                    </div>
+              ) : "No post found"}
+            <div style={{display: 'flex', flexDirection: 'row', gap: '2px', overflowX: 'auto'}}>
+                {FeaturedPosts.map((post) => (
+                    <div key={post.id} style={{width:'300px', flexShrink: 0}} onClick={() => navigate(`/post/${post.id}`)}>
+                      <img src={post.image_path} alt={post.title} style={{ width: '100%' }} />
+                      {post.title}
+                    </div>
+                ))}
+              </div>
+            {/*</Row>*/}
 
             <Divider/>
 
             <Row>
+              <div style={{display: 'flex', flexDirection: 'column', gap: '2px'}}>
+                {postNotFeaturedPosts.map((post) => (
+                    <div
+                        key={post.id}
+                        style={{
+                          // width: '900px'
+                          flexShrink: 0,
+                          display: 'flex',
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: '10px'
+                        }}
+                        onClick={() => navigate(`/post/${post.id}`)}
+                    >
+                      <img
+                          src={post.image_path}
+                          alt={post.title}
+                          style={{width: '200px', objectFit: 'cover', borderRadius: '5px'}}
+                      />
+                      <h3 style={{margin: 0, lineHeight: '1.2'}}>{post.title}</h3>
+                    </div>
+                ))}
+              </div>
+            </Row>
 
+            <Divider/>
+
+            <Row>
+              {isLoading ? "Loading..." : postsByHashtags.length > 0 ? (
+                  <h1>
+                    {postsByHashtags[0].tag_name}
+                  </h1>
+              ) : "No post found"}
+              <div style={{display: 'flex', flexDirection: 'row', gap: '2px', overflowX: 'auto'}}>
+                {postsByHashtags.map((post) => (
+                    <div key={post.id}
+                    style={{
+                      flexShrink: 0,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '10px'
+                    }}
+                    >
+                      <img
+                          src={post.image_path}
+                          alt={post.title}
+                          style={{width: '300px', objectFit: 'cover', borderRadius: '5px'}}
+                      />
+                      <h3 style={{margin: 0, lineHeight: '1.2'}}>{post.title}</h3>
+                    </div>
+                ))}
+              </div>
             </Row>
 
           </Col>
@@ -480,9 +487,23 @@ function Home() {
               ))}
               <div className="bg-dark" onClick={() => onMoreRecentPost_Click()}>ds</div>
             </div>
+            <div>
+              <Col className="d-flex gap-2 flex-column">
+                <h1>Influencer</h1>
+                {users.map((user) => (
+                    <div className="d-flex gap-2 flex-row align-items-center">
+                      <img src={user.photoUrl} style={{height: '60px', width: '60px', borderRadius: '50%'}}/>
+                      <h3>{user.name}</h3>
+                    </div>
+                ))}
+              </Col>
+            </div>
           </Col>
         </Row>
 
+        <Row className="bg-dark" style={{height:'100px'}}>
+
+        </Row>
       </Container>
     </>
   );

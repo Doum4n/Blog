@@ -55,6 +55,7 @@ const Layout = () => {
   return (
     <>
       <Container className="mt-2">
+        <div className="bg-info" style={{height: '70px'}}>BANNER</div>
         <Navbar bg="light" className="border-0 bg-white mb-3">
           <Navbar.Collapse>
             <Navbar.Brand className="ms-3" onClick={() => navigate('/home')}>

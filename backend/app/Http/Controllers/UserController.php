@@ -72,7 +72,9 @@ class UserController extends Controller
 
     public function index(): JsonResponse
     {
-        $users = User::query()->paginate(10);
+        $users = User::query()
+            ->orderByDesc('followers')
+            ->paginate(10);
         return response()->json($users);
     }
 
