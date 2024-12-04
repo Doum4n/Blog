@@ -43,6 +43,11 @@ class UserController extends Controller
         }
     }
 
+    public function getUserById(string $uuid): JsonResponse
+    {
+        return response()->json(User::query()->where('uuid', $uuid)->first());
+    }
+
     public function createUser(Request $request): JsonResponse
     {
         User::factory()->createOne([

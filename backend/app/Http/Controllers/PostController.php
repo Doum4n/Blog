@@ -43,7 +43,7 @@ class PostController extends Controller
     {
         //SELECT p.*, i.path FROM `posts` as p JOIN `images` as i on p.id = i.post_id WHERE p.id = 1
         $post = DB::table('posts')
-            ->join('images', 'images.post_id', '=', 'posts.id')
+            ->join('images', 'images.post_id', '=', 'posts.id', 'left')
             ->select('images.path', 'posts.*')
             ->where('posts.id', $id)
             ->first();
@@ -106,7 +106,7 @@ class PostController extends Controller
     public function getPostByUuid(string $uuid): JsonResponse
     {
         $post = Post::query()
-            ->join('images', 'images.post_id', '=', 'posts.id')
+            ->join('images', 'images.post_id', '=', 'posts.id', 'left')
             ->where('posts.user_id', $uuid)
             ->selectRaw('posts.*, MAX(images.path) as path')
             ->groupBy('posts.id')

@@ -131,11 +131,15 @@ const Status = () => {
         Interact('like');
     }
 
+    const imagePaths = status.image_paths ? status.image_paths.split(',') : [];
+
     return (
         <Container>
             <Row>
-                <Col className="bg-dark d-flex justify-content-center align-items-center">
-                    <img src={status.image_path}/>
+                <Col className="bg-dark d-flex flex-row align-items-center justify-content-center overflow-x-auto">
+                    {imagePaths.map((path) => (
+                        <img src={`http://0.0.0.0/storage/${path}`} className="w-100 h-100" key={path}/>
+                    ))}
                 </Col>
                 <Col className="bg-secondary-subtle p-4" style={{overflowY: "auto"}}>
                     <Image src={status.avatar} roundedCircle style={{ width: '50px', height: '50px', marginBottom: '10px', marginRight: '10px' }} />
@@ -164,7 +168,7 @@ const Status = () => {
                                 <Comment
                                     updated_at={comment.updated_at}
                                     nameUser={comment.user_name}
-                                    ImageSrc={comment.avater}
+                                    ImageSrc={comment.avatar}
                                     comment={comment.content}
                                     id={comment.id}
                                     type="status"
@@ -176,7 +180,7 @@ const Status = () => {
                                         <Comment
                                             updated_at={childComment.updated_at}
                                             nameUser={childComment.user_name}
-                                            ImageSrc={childComment.avater}
+                                            ImageSrc={childComment.avatar}
                                             comment={childComment.content}
                                             id={childComment.id}
                                             type="status"

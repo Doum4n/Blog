@@ -2,6 +2,7 @@ import { Container, Row, Col, Button } from "react-bootstrap"
 import { Image, Form } from "react-bootstrap";
 import SubComment from "./subcoment";
 import { useState } from "react";
+import {useNavigate} from "react-router-dom";
 
 const Comment = ({ImageSrc,updated_at, nameUser, comment, id, type, disableReply}) => {
 
@@ -22,11 +23,13 @@ const Comment = ({ImageSrc,updated_at, nameUser, comment, id, type, disableReply
         second: '2-digit',
         hour12: false,
       });
+
+    const navigate = useNavigate();
     
     return (
         <Container className="mb-3">
             <Row>
-                <Col xs="auto">
+                <Col xs="auto" >
                     <Image src={ImageSrc} roundedCircle style={{ width: '50px', height: '50px' }} />
                 </Col>
                 <Col>

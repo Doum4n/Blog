@@ -4,7 +4,7 @@ import UserLayout from './userLayout.jsx';
 import GuestLayput from './guestLayout.jsx';
 import Register from './register.jsx';
 import Login from './login.jsx';
-import Account from './account.jsx';
+import MyAccount from './MyAccount.jsx';
 import Post from './post/post.jsx';
 import PostUpload from './post/postUpload.jsx';
 import Create_account from './create_acount.jsx';
@@ -18,6 +18,7 @@ import CommentManagement from "../admin/comments/CommentManagement.jsx";
 import PostsByTopic from "./PostsByTopic.jsx";
 import RecentPosts from "./RecentPosts.jsx";
 import Status from "./Status.jsx";
+import OtherAccount from "./OtherAccount.jsx";
 const router = createBrowserRouter([
     {
         path: '/',
@@ -40,6 +41,10 @@ const router = createBrowserRouter([
                 element: <PostsByTopic/>
             },
             {
+                path: '/user/:uuid',
+                element: <OtherAccount/>
+            },
+            {
                 path: '/posts/recent',
                 element: <RecentPosts/>
             },
@@ -49,7 +54,7 @@ const router = createBrowserRouter([
             },
             {
                 path: 'account',
-                element: <Account/>
+                element: <MyAccount/>
             },
         ],
     },

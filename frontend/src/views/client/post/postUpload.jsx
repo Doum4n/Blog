@@ -31,6 +31,8 @@ const UploadFile = () => {
   const [show, setShow] = useState(false);
   const [uuid, setUuid] = useState('');
 
+
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setSelectedFile(file);
@@ -136,18 +138,18 @@ const UploadFile = () => {
   return (
     <Container className='mt-3'>
       <Form>
-        <Form.Control type='text' placeholder='Title' className='mb-3' onChange={(e) => setTitle(e.target.value)} />
+        <Form.Control type='text' placeholder='Title' className='mb-3' onChange={(e) => setTitle(e.target.value)}/>
         <FormGroup>
           <InputGroup className="mb-3">
             <InputGroup.Text>Tag</InputGroup.Text>
             <FormControl
-              type="text"
-              placeholder="Tag"
+                type="text"
+                placeholder="Tag"
             />
           </InputGroup>
         </FormGroup>
         <Form.Control type="file" onChange={handleFileChange} className='mb-3'/>
-        {url && <img src={`http://0.0.0.0/storage/${url}`} alt="Uploaded" className='mb-3' />}
+        {url && <img src={`http://0.0.0.0/storage/${url}`} alt="Uploaded" className='mb-3'/>}
 
         <Editor
         ref={quillRef}
@@ -159,32 +161,32 @@ const UploadFile = () => {
         content={handlerHtmlChange}
         post_id={post_id}
         />
-        
+
         <div className='mt-3'>
           <Button onClick={UploadPost}>POST</Button>
           <Button onClick={showModal} className='ms-3'>CANCEL</Button>
         </div>
 
         <Modal
-        show={show}
-        onHide={closeModal}
-        backdrop="static"
-        keyboard={false}
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Warning!</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          Do you want to cancel this post?
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={closeModal}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={PostHandler}>Yes</Button>
-        </Modal.Footer>
-      </Modal>
-        <div dangerouslySetInnerHTML={{ __html: htmlContent }} />      
+            show={show}
+            onHide={closeModal}
+            backdrop="static"
+            keyboard={false}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Warning!</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            Do you want to cancel this post?
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={closeModal}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={PostHandler}>Yes</Button>
+          </Modal.Footer>
+        </Modal>
+        <div dangerouslySetInnerHTML={{__html: htmlContent}}/>
       </Form>
     </Container>
   );

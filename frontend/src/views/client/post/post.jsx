@@ -7,6 +7,7 @@ import { auth } from "../../../config/firebase";
 import MostViewPost from "../component/post/mostViewPost";
 import PostTopic from "../component/topic/post_topic";
 import '../../../../node_modules/bootstrap/dist/css/bootstrap.min.css';
+import 'quill/dist/quill.snow.css';
 
 const Post = () => {
 
@@ -318,7 +319,7 @@ const Post = () => {
 
                     {/* //Content */}
                     <div className="mt-2">
-                        <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content) }} />
+                        <div className="ql-editor" dangerouslySetInnerHTML={{ __html: (content) }} />
                         <br />
                         <div>
                             {photoUrl.map((url, index) => (

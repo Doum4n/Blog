@@ -197,6 +197,8 @@ function Home() {
     display: 'flex',
     flexDirection: 'column',
     gap: '20px',
+    overflowY: 'auto',
+    height: '400px',
   };
 
   //TODO
@@ -227,15 +229,71 @@ function Home() {
           }
           return response.json();
         }).then(data => {
-          console.log(data);
+          setStatusId(data)
         });
   }
+
+  const [statusId, setStatusId] = useState(null);
+  const [url, setUrl] = useState([]);
+  const [imageUrl, setImageUrl] = useState([]);
+
+  useEffect(() => {
+    if(statusId && url)
+      StoreImage();
+      setImageUrl([]);
+  }, [statusId])
+
+  const StoreImage = async () => {
+    await fetch('http://0.0.0.0/image/store', {
+      method: 'POST',
+      headers: {
+        'Content-Type' : 'application/json'
+      },
+      body: JSON.stringify({
+        post_id: null,
+        status_id : statusId,
+        paths : url
+      }),
+    })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log('Store image success:', data.path);
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+  }
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      handleSubmit(file);
+    }
+  };
+
+  const handleSubmit = (file) => {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    fetch('http://0.0.0.0/image/temp', {
+      method: 'POST',
+      body: formData,
+    })
+        .then((response) => response.json())
+        .then((data) => {
+          setUrl(prev => [...prev, data.path]);
+          setImageUrl(prev => [...prev, data.path]);
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+  };
 
   return (
     <>
       <Container>
         <Row>
-          <div style={{display: 'flex', flexDirection: 'row', gap: '10px'}}>
+          <div style={{display: 'flex', flexDirection: 'row', gap: '10px', overflowX: 'auto'}}>
             <div onClick={() => handleOpen()} className="bg-secondary d-flex justify-content-center align-items-center" style={{height: '200px', width: '150px', borderRadius: '10px'}} >
               <h1 style={{fontSize: '40px'}}>
                 +
@@ -248,7 +306,13 @@ function Home() {
                   <Form className="mt-1" ref={FormRef}>
                     <Form.Control as="textarea" rows={3} placeholder="Content" name={'content'} />
                   </Form>
+                  <Form.Control type="file" onChange={handleFileChange} className='mb-3'/>
                   <Button variant="contained" onClick={() => onPostStatus_Click()}>Post</Button>
+                  <div>
+                    {imageUrl.map((path) => (
+                        <img src={`http://0.0.0.0:/storage/${path}`} alt="" style={{ width: '200px' }} key={path} />
+                    ))}
+                  </div>
                 </Box>
               </Modal>
             </div>
@@ -384,7 +448,7 @@ function Home() {
 
             <Divider/>
 
-            {/*<Row>*/}
+            {/* Featured posts */}
               <h2>Featured Posts</h2>
             {isLoading ? "Loading..." : FeaturedPosts.length > 0 ? (
                     <div style={{display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center', backgroundColor: 'gray', padding: '20px', paddingTop: '20px'}}>
@@ -400,10 +464,11 @@ function Home() {
                     </div>
                 ))}
               </div>
-            {/*</Row>*/}
+            {/**/}
 
             <Divider/>
 
+            {/* Featured posts */}
             <Row>
               <div style={{display: 'flex', flexDirection: 'column', gap: '2px'}}>
                 {postNotFeaturedPosts.map((post) => (
@@ -432,13 +497,14 @@ function Home() {
 
             <Divider/>
 
+            {/* Posts by hashtag */}
             <Row>
               {isLoading ? "Loading..." : postsByHashtags.length > 0 ? (
                   <h1>
                     {postsByHashtags[0].tag_name}
                   </h1>
               ) : "No post found"}
-              <div style={{display: 'flex', flexDirection: 'row', gap: '2px', overflowX: 'auto'}}>
+              <div style={{display: 'flex', flexDirection: 'row', gap: '2px', overflowX: 'auto', padding: '20px', backgroundColor: 'gray'}}>
                 {postsByHashtags.map((post) => (
                     <div key={post.id}
                     style={{
@@ -446,19 +512,23 @@ function Home() {
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
-                      gap: '10px'
+                      width: '300px',
+                      padding: '20px',
+                      gap: '10px',
                     }}
+                    onClick={() => navigate(`/post/${post.id}`)}
                     >
                       <img
                           src={post.image_path}
                           alt={post.title}
                           style={{width: '300px', objectFit: 'cover', borderRadius: '5px'}}
                       />
-                      <h3 style={{margin: 0, lineHeight: '1.2'}}>{post.title}</h3>
+                      <p>{post.title}</p>
                     </div>
                 ))}
               </div>
             </Row>
+          {/*  */}
 
           </Col>
 

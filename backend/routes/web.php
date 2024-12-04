@@ -77,6 +77,7 @@ Route::middleware([CorsMiddleware::class])->group(function () {
     Route::put('user/update/photo', [UserController::class, 'updatePhoto']);
     Route::get('users/index', [UserController::class, 'index']);
     Route::delete('users/delete', [UserController::class, 'deleteUser']);
+    Route::get('user/{id}', [UserController::class, 'getUserById']);
 
     Route::put('interaction', [interactionController::class, 'update']);
     Route::get('interact/share/{id}', [interactionController::class, 'getPostsSharedByUser']);
@@ -92,6 +93,7 @@ Route::middleware([CorsMiddleware::class])->group(function () {
     Route::get('status/{id}', [StatusController::class, 'getStatusById']);
     Route::get('status/{id}/like', [StatusController::class, 'increaseLike']);
     Route::post('status/create', [StatusController::class, 'createStatus']);
+    Route::get('/status/user/{id}', [StatusController::class, 'getStatusByUserId']);
 
     //ADMIN
     Route::get('/statistical', [AdminController::class, 'getStatistical']);

@@ -32,17 +32,20 @@ class ImageController extends Controller
 
     public function store(Request $request): JsonResponse
     {
-        $request->validate([
-            'path' => 'required|string',
-            'post_id' => 'required|integer',
-        ]);
+        $paths = $request->input('paths');
+        $createdPaths = [];
 
-        $image = Image::factory()->createOne([
-            'post_id' => $request->input('post_id'),
-            'path' => $request->input('path')
-        ]);
+        foreach ($paths as $path){
+            $image = Image::query()->create([
+                'status_id' => $request->input('status_id'),
+                'post_id' => $request->input('post_id'),
+                'path' => $path
+            ]);
+            $createdPaths[] = $image->path;
 
-        return response()->json(['path' => $image->path]);
+        }
+
+        return response()->json(['paths' => $createdPaths]);
     }
 
     public function getImage(String $id)
