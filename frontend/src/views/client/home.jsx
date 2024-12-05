@@ -90,6 +90,7 @@ function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [postNotFeaturedPosts, setPostNotFeaturedPosts] = useState([]);
   const [postsByHashtags, setPostsByHashtags] = useState([]);
+  const [top4Groups, setTop4Groups] = useState([]);
 
   useEffect(() => {
     try {
@@ -110,13 +111,14 @@ function Home() {
       fetch('http://0.0.0.0/post/Featured'),
       fetch('http://0.0.0.0/posts/not-popular'),
       fetch('http://0.0.0.0/posts/recent'),
-      fetch('http://0.0.0.0/topics'),
-      fetch('http://0.0.0.0/post/topic/5'),
+      fetch('http://0.0.0.0/forums'),
+      fetch('http://0.0.0.0/post/forum/5'),
       fetch('http://0.0.0.0/status/index'),
       fetch('http://0.0.0.0/users/index'),
-        fetch('http://0.0.0.0/posts/hashtag/1'),
+        fetch('http://0.0.0.0/posts/hashtag/3'),
+        fetch('http://0.0.0.0/group/top4'),
     ])
-        .then(([mostViewedRes, PopularRes, featuredRes, notFeaturedRes, recentRes, topicsRes, postsByTopicRes, statusesRes, usersRes, postsbyHashTagRes]) => {
+        .then(([mostViewedRes, PopularRes, featuredRes, notFeaturedRes, recentRes, topicsRes, postsByTopicRes, statusesRes, usersRes, postsbyHashTagRes, top4GroupsRes]) => {
           return Promise.all([
             mostViewedRes.json(),
             PopularRes.json(),
@@ -128,9 +130,10 @@ function Home() {
             statusesRes.json(),
             usersRes.json(),
             postsbyHashTagRes.json(),
+              top4GroupsRes.json(),
           ]);
         })
-        .then(([mostViewedData, popularData, featuredData, notFeaturedData, recentData, topicsData, postsByTopicData, statusesData, usersData, postsbyHashTagData]) => {
+        .then(([mostViewedData, popularData, featuredData, notFeaturedData, recentData, topicsData, postsByTopicData, statusesData, usersData, postsbyHashTagData, top4GroupsData]) => {
           setMostViewPosts(mostViewedData.posts);
           setPopularPosts(popularData.posts);
           setFeaturedPosts(featuredData);
@@ -141,6 +144,7 @@ function Home() {
           setStatuses(statusesData.data);
           setUsers(usersData.data);
           setPostsByHashtags(postsbyHashTagData)
+          setTop4Groups(top4GroupsData);
 
           setIsLoading(false);
         })
@@ -160,7 +164,7 @@ function Home() {
 
   const [selectedTopic, setSelectedTopic] = useState(null);
   const onclick = (id) => {
-    fetch(`http://0.0.0.0/post/topic/${id}`)
+    fetch(`http://0.0.0.0/post/forum/${id}`)
         .then(response => {
           if (!response.ok) {
             throw new Error('Network response was not ok');
@@ -177,11 +181,11 @@ function Home() {
   }
 
   const onMorePostsByTopic_Click = () => {
-      navigate(`/topic/${selectedTopic}`);
+      navigate(`/forum/${selectedTopic}`);
   }
 
   const onMoreRecentPost_Click = () => {
-    navigate(`/posts/recent`);
+      navigate(`/posts/recent`);
   }
 
   const style = {
@@ -363,10 +367,10 @@ function Home() {
               ))}
             </Row>
 
-            {/* //Topics */}
+            {/* //Forums */}
             <Divider/>
             <Row>
-              <h1>Topics</h1>
+              <h1>Forums</h1>
               <div style={{display: 'flex', flexDirection: 'row', gap: '2px', flex: '1', overflowX: 'auto'}}>
                 {topics.map((topic) => (
                     <div style={{marginBottom: '20px'}}>
@@ -499,41 +503,81 @@ function Home() {
 
             {/* Posts by hashtag */}
             <Row>
-              {isLoading ? "Loading..." : postsByHashtags.length > 0 ? (
-                  <h1>
-                    {postsByHashtags[0].tag_name}
-                  </h1>
-              ) : "No post found"}
-              <div style={{display: 'flex', flexDirection: 'row', gap: '2px', overflowX: 'auto', padding: '20px', backgroundColor: 'gray'}}>
-                {postsByHashtags.map((post) => (
-                    <div key={post.id}
+              {isLoading ? (
+                  "Loading..."
+              ) : postsByHashtags.length > 0 ? (
+                  <h1>#{postsByHashtags[0].tag_name}</h1>
+              ) : (
+                  "No post found"
+              )}
+              <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column", // Container bên ngoài theo cột
+                    gap: "10px",
+                    overflowX: "hidden",
+                    padding: "20px",
+                    backgroundColor: "gray",
+                  }}
+              >
+                <div
                     style={{
-                      flexShrink: 0,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      width: '300px',
-                      padding: '20px',
-                      gap: '10px',
+                      display: "flex", // Container bên trong các bài post theo hàng ngang
+                      flexDirection: "row",
+                      gap: "10px",
+                      overflowX: "auto", // Cuộn ngang nếu cần
                     }}
-                    onClick={() => navigate(`/post/${post.id}`)}
-                    >
-                      <img
-                          src={post.image_path}
-                          alt={post.title}
-                          style={{width: '300px', objectFit: 'cover', borderRadius: '5px'}}
-                      />
-                      <p>{post.title}</p>
-                    </div>
-                ))}
+                >
+                  {postsByHashtags.map((post) => (
+                      <div
+                          key={post.id}
+                          style={{
+                            flexShrink: 0, // Đảm bảo kích thước cố định
+                            display: "flex",
+                            flexDirection: "column", // Bố cục theo cột
+                            alignItems: "center", // Canh giữa nội dung
+                            width: "300px",
+                            padding: "10px",
+                            gap: "10px",
+                            backgroundColor: "white",
+                            borderRadius: "5px",
+                          }}
+                          onClick={() => navigate(`/post/${post.id}`)}
+                      >
+                        <img
+                            src={post.image_path}
+                            alt={post.title}
+                            style={{
+                              width: "100%",
+                              height: "200px",
+                              objectFit: "cover",
+                              borderRadius: "5px",
+                            }}
+                        />
+                        <p
+                            style={{
+                              textAlign: "center", // Canh giữa tiêu đề
+                              margin: "0",
+                              fontSize: "16px",
+                              fontWeight: "bold",
+                            }}
+                        >
+                          {post.title}
+                        </p>
+                      </div>
+                  ))}
+                </div>
+                <Button variant="contained">More</Button>
               </div>
             </Row>
-          {/*  */}
+
+            {/*  */}
 
           </Col>
 
           <Col md={4}>
             <div>
+              {/*Most view*/}
               <h2>Most view</h2>
               {mostViewPosts.map((post) => (
                   <SubPost
@@ -544,8 +588,10 @@ function Home() {
                   />
               ))}
               <div className="bg-dark">ds</div>
+              {/*  */}
             </div>
             <div>
+              {/*Recent post*/}
               <h2>Recent Posts</h2>
               {RecentPosts.map((post) => (
                   <SubPost
@@ -556,8 +602,10 @@ function Home() {
                   />
               ))}
               <div className="bg-dark" onClick={() => onMoreRecentPost_Click()}>ds</div>
+              {/*  */}
             </div>
             <div>
+              {/*Influencers*/}
               <Col className="d-flex gap-2 flex-column">
                 <h1>Influencer</h1>
                 {users.map((user) => (
@@ -567,11 +615,79 @@ function Home() {
                     </div>
                 ))}
               </Col>
+              {/*  */}
+            </div>
+
+            <Divider/>
+
+            {/*Groups*/}
+            <div>
+              <h2>Groups</h2>
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '10px',
+                alignItems: 'center',
+                backgroundColor: '#1c1c1c',
+                padding: '10px',
+                borderRadius: '10px'
+              }}>
+                <h2 style={{color: 'white', margin: '0 0 10px 0'}}>Cộng đồng</h2>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(2, 1fr)',
+                  gap: '10px',
+                  width: '100%'
+                }}>
+                  {top4Groups.map(group => (
+                      <div key={group.id} onClick={() => navigate(`/group/${group.id}`)} style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        backgroundColor: '#2c2c2c',
+                        borderRadius: '10px',
+                        padding: '10px'
+                      }}>
+                        <img
+                            src={group.coverPhotoUrl}
+                            alt={group.name}
+                            style={{
+                              width: '100%',
+                              borderRadius: '5px',
+                              objectFit: 'cover',
+                              aspectRatio: '16/9'
+                            }}
+                        />
+                        <p style={{
+                          color: 'white',
+                          textAlign: 'center',
+                          marginTop: '10px',
+                          fontSize: '14px',
+                          fontWeight: 'bold'
+                        }}>{group.name}</p>
+                      </div>
+                  ))}
+                </div>
+                <Button variant="contained" style={{
+                  // marginTop: '20px',
+                  width: '100%',
+                  padding: '10px 20px',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '5px',
+                  cursor: 'pointer',
+                }}
+                onClick={() => navigate(`/groups`)}
+                >
+                  More
+                </Button>
+              </div>
+            {/*  */}
             </div>
           </Col>
         </Row>
 
-        <Row className="bg-dark" style={{height:'100px'}}>
+        <Row className="bg-dark" style={{height: '100px'}}>
 
         </Row>
       </Container>

@@ -13,12 +13,14 @@ import AdminLayout from '../admin/home/home.jsx';
 import AdminPost from '../admin/posts/Posts.jsx';
 import DashBoard from '../admin/home/home.jsx';
 import UserManager from '../admin/users/UserManager.jsx';
-import TopicManagement from "../admin/topic/TopicManagement.jsx";
+import TopicManagement from "../admin/forum/ForumManagement.jsx";
 import CommentManagement from "../admin/comments/CommentManagement.jsx";
 import PostsByTopic from "./PostsByTopic.jsx";
 import RecentPosts from "./RecentPosts.jsx";
 import Status from "./Status.jsx";
 import OtherAccount from "./OtherAccount.jsx";
+import Group from "./Group.jsx";
+import Groups from "./Groups.jsx";
 const router = createBrowserRouter([
     {
         path: '/',
@@ -37,12 +39,20 @@ const router = createBrowserRouter([
                 element: <Post/>
             },
             {
-                path: '/topic/:id',
+                path: '/forum/:id',
                 element: <PostsByTopic/>
             },
             {
                 path: '/user/:uuid',
                 element: <OtherAccount/>
+            },
+            {
+                path: '/group/:id',
+                element: <Group/>
+            },
+            {
+                path: '/groups',
+                element: <Groups/>
             },
             {
                 path: '/posts/recent',

@@ -2,12 +2,13 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\GroupController;
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\interactionController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\PostTagController;
 use App\Http\Controllers\StatusController;
-use App\Http\Controllers\TopicController;
+use App\Http\Controllers\ForumController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -55,11 +56,12 @@ Route::middleware([CorsMiddleware::class])->group(function () {
     Route::get('posts/not-popular', [PostController::class, 'getNotPopularPosts']);
 
     Route::get('posts/hashtag/{id}', [PostController::class, 'getPostsByHashtag']);
-    Route::get('/post/topic/{id}', [PostController::class, 'getPostByTopicId']);
-    Route::get('/post/topic/{id}/all', [PostController::class, 'getPostByTopicId_All']);
+    Route::get('/post/forum/{id}', [PostController::class, 'getPostByForumId']);
+    Route::get('/post/forum/{id}/all', [PostController::class, 'getPostByForumId_All']);
     Route::get('/posts/recent', [PostController::class, 'getRecentPosts']);
     Route::get('/posts/recent/all', [PostController::class, 'getRecentPosts_All']);
     Route::get('post/index', [PostController::class, 'index']);
+    Route::get('posts/group/{id}', [PostController::class, 'getPostsByGroupId']);
     Route::get('/get-post/comment/{comment_id}', [PostController::class, 'getPostByCommentId']);
     Route::delete('posts/delete', [PostController::class, 'deletePost']);
 
@@ -78,6 +80,7 @@ Route::middleware([CorsMiddleware::class])->group(function () {
     Route::get('users/index', [UserController::class, 'index']);
     Route::delete('users/delete', [UserController::class, 'deleteUser']);
     Route::get('user/{id}', [UserController::class, 'getUserById']);
+    Route::get('user/post/{id}', [UserController::class, 'getUserByPostId']);
 
     Route::put('interaction', [interactionController::class, 'update']);
     Route::get('interact/share/{id}', [interactionController::class, 'getPostsSharedByUser']);
@@ -85,9 +88,9 @@ Route::middleware([CorsMiddleware::class])->group(function () {
     Route::get('/post/{id}/tags', [PostTagController::class, 'getTagsByPostId']);
     Route::get('/tag/{id}', [PostTagController::class, 'getTagNameByTagId']);
 
-    Route::get('/topics', [TopicController::class, 'all']);
-    Route::get('/topics/index', [TopicController::class, 'index']);
-    Route::get('/topic/{id}', [TopicController::class, 'topicById']);
+    Route::get('/forums', [ForumController::class, 'all']);
+    Route::get('/forums/index', [ForumController::class, 'index']);
+    Route::get('/forum/{id}', [ForumController::class, 'forumById']);
 
     Route::get('status/index', [StatusController::class, 'index']);
     Route::get('status/{id}', [StatusController::class, 'getStatusById']);
@@ -95,11 +98,14 @@ Route::middleware([CorsMiddleware::class])->group(function () {
     Route::post('status/create', [StatusController::class, 'createStatus']);
     Route::get('/status/user/{id}', [StatusController::class, 'getStatusByUserId']);
 
+    Route::get('group/{id}', [GroupController::class, 'getGroupById'])->whereNumber('id');
+    Route::get('group/top4', [GroupController::class, 'index_4']);
+
     //ADMIN
     Route::get('/statistical', [AdminController::class, 'getStatistical']);
 
-    Route::put('/topic/edit', [TopicController::class, 'editTopic']);
-    Route::delete('/topic/delete', [TopicController::class, 'deleteTopic']);
+    Route::put('/forum/edit', [ForumController::class, 'editForum']);
+    Route::delete('/forum/delete', [ForumController::class, 'deleteForum']);
 
     Route::get('comments/index', [CommentController::class, 'index']);
     Route::get('comment/related', [CommentController::class, 'relatedComments']);

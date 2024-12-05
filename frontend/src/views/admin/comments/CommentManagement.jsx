@@ -122,7 +122,7 @@ const Comment = () => {
                 const fetchSelectedComment = async () => {
                     try {
                         const response = await fetch(`http://0.0.0.0/comment/${state.selectId}`);
-                        if (!response.ok) throw new Error('Cant get topic');
+                        if (!response.ok) throw new Error('Cant get forum');
                         const data = await response.json();
                         setSelectedComment(data); // Cập nhật comment chính
                     } catch (error) {

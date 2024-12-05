@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Container, Form, FormControl, FormGroup, InputGroup, Modal } from 'react-bootstrap';
+import { Button, Container, Form, FormGroup, InputGroup } from 'react-bootstrap';
 import 'react-quill/dist/quill.snow.css';
 import { useRef } from 'react';
 import Editor from './Editor';
@@ -8,29 +8,25 @@ import Quill from 'quill/dist/quill.js';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../../../config/firebase';
+import {Box, InputLabel, MenuItem, Modal} from "@mui/material";
+import Select from "@mui/material/Select";
+import FormControl from '@mui/material/FormControl';
 const Delta = Quill.import('delta');
 
 const UploadFile = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [url, setUrl] = useState();
   const [urlUpdate, setUrlUpdate] = useState();
-
   const [range, setRange] = useState();
   const [lastChange, setLastChange] = useState();
   const [readOnly, setReadOnly] = useState(false);
   const [post_id, setPostID] = useState(null);
-
   const [submit, setSumib] = useState(false);
-
   const [htmlContent, setHtmlContent] = useState();
-
   const quillRef = useRef(); // Khởi tạo ref để tham chiếu đến phần tử DOM
-
   const [title, setTitle] = useState('');
-
   const [show, setShow] = useState(false);
   const [uuid, setUuid] = useState('');
-
 
 
   const handleFileChange = (e) => {
@@ -108,13 +104,16 @@ const UploadFile = () => {
       body: JSON.stringify({
         title : title,
         content_post : htmlContent,
-        user_id : uuid
+        user_id : uuid,
+        forum_id : FormRef.current.elements.selectedForum.value,
+        tag_name: FormRef.current.elements.TagName.value,
       }),
     })
     .then((response) => response.json())
     .then((data) =>{
       setPostID(data.id);
       setSumib(true);
+      handleChoseForumOpen();
       console.log('Upload post success:', data.id);
     })
     .catch((error) => {
@@ -135,60 +134,124 @@ const UploadFile = () => {
       navigate(`/home`);
   }
 
+  const FormRef = useRef(null);
+
+  const style = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 700,
+    height: 300,
+    backgroundColor: 'white',
+    border: '2px solid #000',
+    boxShadow: 24,
+    padding: 20,
+  };
+
+  const styleCancel = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 700,
+    bgcolor: 'background.paper',
+    border: '2px solid #000',
+    boxShadow: 24,
+    padding: 1,
+    display: 'flex', // Đảm bảo modal sử dụng flexbox
+    flexDirection: 'row', // Căn chỉnh các phần tử trong modal
+    justifyContent: 'flex-end',
+  };
+
+  const [showChoseForum, setShowChoseForum] = useState(false);
+  const handleChoseForumOpen = () => setShowChoseForum(true);
+  const handleChoseForumClose = () => setShowChoseForum(false);
+
+  const [selectedForum, setSelectedForum] = useState("Form");
+  const handleFormChange = (e) => {
+    e.preventDefault();
+    setSelectedForum(e.target.value);
+  }
+
+  const [forums, setForums] = useState([]);
+
+  useEffect(() => {
+    fetch(`http://0.0.0.0/forums`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          setForums(data);
+        })
+        .catch(error => {
+          console.error('There was a problem with the fetch operation:', error);
+        });
+  }, []);
+
   return (
-    <Container className='mt-3'>
-      <Form>
-        <Form.Control type='text' placeholder='Title' className='mb-3' onChange={(e) => setTitle(e.target.value)}/>
-        <FormGroup>
-          <InputGroup className="mb-3">
-            <InputGroup.Text>Tag</InputGroup.Text>
-            <FormControl
-                type="text"
-                placeholder="Tag"
-            />
-          </InputGroup>
-        </FormGroup>
-        <Form.Control type="file" onChange={handleFileChange} className='mb-3'/>
-        {url && <img src={`http://0.0.0.0/storage/${url}`} alt="Uploaded" className='mb-3'/>}
+      <Container className='mt-3'>
+        <Form >
+          <Form.Control type='text' placeholder='Title' className='mb-3' onChange={(e) => setTitle(e.target.value)}/>
+          <Form.Control type="file" onChange={handleFileChange} className='mb-3'/>
+          {url && <img src={`http://0.0.0.0/storage/${url}`} alt="Uploaded" className='mb-3'/>}
 
-        <Editor
-        ref={quillRef}
-        readOnly={readOnly}
-        defaultValue={""}
-        onSelectionChange={setRange}
-        onTextChange={handleGetHTML}
-        onSubmit={submit}
-        content={handlerHtmlChange}
-        post_id={post_id}
-        />
+          <Editor
+              ref={quillRef}
+              readOnly={readOnly}
+              defaultValue={""}
+              onSelectionChange={setRange}
+              onTextChange={handleGetHTML}
+              onSubmit={submit}
+              content={handlerHtmlChange}
+              post_id={post_id}
+          />
 
-        <div className='mt-3'>
-          <Button onClick={UploadPost}>POST</Button>
-          <Button onClick={showModal} className='ms-3'>CANCEL</Button>
-        </div>
+          <div className='mt-3'>
+            <Button onClick={() => handleChoseForumOpen()}>POST</Button>
+            <Button onClick={showModal} className='ms-3'>CANCEL</Button>
+          </div>
 
+          <Modal
+              open={show}
+              onClose={closeModal}
+          >
+            <Box sx={styleCancel}>
+              <Button variant="secondary" onClick={closeModal}>No</Button>
+              <Button variant="primary" onClick={PostHandler}>Yes</Button>
+              </Box>
+          </Modal>
+          <div dangerouslySetInnerHTML={{__html: htmlContent}}/>
+        </Form>
         <Modal
-            show={show}
-            onHide={closeModal}
-            backdrop="static"
-            keyboard={false}
+            open={showChoseForum}
+            onClose={handleChoseForumClose}
         >
-          <Modal.Header closeButton>
-            <Modal.Title>Warning!</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            Do you want to cancel this post?
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={closeModal}>
-              Cancel
-            </Button>
-            <Button variant="primary" onClick={PostHandler}>Yes</Button>
-          </Modal.Footer>
+          <box style={style}>
+            <Form ref={FormRef}>
+              <Form.Group className="mb-3">
+                <Form.Label>Hashtag</Form.Label>
+                <Form.Control name="TagName" placeholder="hashtag"/>
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Forum</Form.Label>
+                <Form.Select name="selectedForum">
+                  {forums.map((forum) => (
+                      <option key={forum.id} value={forum.id}>
+                        {forum.name}
+                      </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+              <Button onClick={UploadPost}>Post</Button>
+            </Form>
+          </box>
+
         </Modal>
-        <div dangerouslySetInnerHTML={{__html: htmlContent}}/>
-      </Form>
-    </Container>
+      </Container>
   );
 };
 

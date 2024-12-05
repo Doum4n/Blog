@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Author;
+use App\Models\Forum;
 use App\Models\Image;
 use App\Models\Tag;
 use App\Models\User;
@@ -24,6 +25,7 @@ class PostFactory extends Factory
             'title' => $this->faker->sentence(),
             'content' => $this->faker->paragraphs(5, true),
             'user_id' => User::all()->random()->uuid,
+            'forum_id' => Forum::all()->random()->id,
             'views' => $this->faker->randomDigit(),
             'likes' => $this->faker->randomDigit(),
             'comments' => $this->faker->randomDigit(),

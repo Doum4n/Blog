@@ -115,9 +115,9 @@ const Topic = () => {
             useEffect(() => {
                 if (!state.selectId) return;
 
-                fetch(`http://0.0.0.0/topic/${state.selectId}`)
+                fetch(`http://0.0.0.0/forum/${state.selectId}`)
                     .then(response => {
-                        if (!response.ok) throw new Error('Cant get topic');
+                        if (!response.ok) throw new Error('Cant get forum');
                         return response.json();
                     })
                     .then(data => {
@@ -147,7 +147,7 @@ const Topic = () => {
 
             const OnSubmitClick = (e) => {
                 e.preventDefault();
-                fetch(`http://0.0.0.0/topic/edit`,
+                fetch(`http://0.0.0.0/forum/edit`,
                     {
                         method: 'PUT',
                         headers: {
@@ -160,7 +160,7 @@ const Topic = () => {
                         })
                     })
                     .then(response => {
-                        if (!response.ok) throw new Error('Cant edit topic');
+                        if (!response.ok) throw new Error('Cant edit forum');
                         return response.json();
                     })
                     .then(data => {
@@ -250,7 +250,7 @@ const Topic = () => {
 
     // initial topics data
     useEffect(() => {
-        fetch('http://0.0.0.0/topics/index')
+        fetch('http://0.0.0.0/forums/index')
             .then(response => {
                 if (!response.ok) throw new Error('Cant get post');
                 return response.json();
@@ -265,7 +265,7 @@ const Topic = () => {
     }, [])
 
     const deletePost = () => {
-        fetch('http://0.0.0.0/topic/delete', {
+        fetch('http://0.0.0.0/forum/delete', {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
@@ -311,7 +311,7 @@ const Topic = () => {
     const [rowsPerPage, setRowsPerPage] = React.useState(10);
 
     useEffect(() => {
-        const url = `http://0.0.0.0/topics/index?per_page=${rowsPerPage}&page=${[page]}`;
+        const url = `http://0.0.0.0/forums/index?per_page=${rowsPerPage}&page=${[page]}`;
         fetch(url)
             .then(response => {
                 if (!response.ok) throw new Error('Cannot fetch topics');

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Image;
+use App\Models\PostTag;
+use App\Models\Tag;
 use App\Models\User;
 use http\Env\Response;
 use Illuminate\Http\JsonResponse;
@@ -28,16 +30,58 @@ class PostController extends Controller
      */
     public function createPost(Request $request): JsonResponse
     {
+        // Tạo bài viết
         $post = Post::factory()->createOne([
             'title' => $request->get('title'),
             'content' => $request->input('content_post'),
             'user_id' => $request->input('user_id'),
+            'forum_id' => $request->input('forum_id'),
         ]);
 
+//        $tag_name = $request->input('$tag_name');
+        $tagNames = explode(',', $request->input('tag_name'));
+
+        foreach ($tagNames as $tagName) {
+            $tagExists = Tag::query()->where('name', trim($tagName))->exists();
+            if($tagExists) {
+                $tag = Tag::query()->where('name', trim($tagName))->select('id')->first();
+
+                PostTag::query()->create([
+                    'post_id' => $post->id,
+                    'tag_id' => $tag->id,
+                ]);
+            }else{
+                $tag = Tag::query()->create([
+                    'name' => trim($tagName),
+                    'topic_id' => 1,
+                ]);
+
+                PostTag::query()->create([
+                    'post_id' => $post->id,
+                    'tag_id' => $tag->id,
+                ]);
+            }
+        }
+
+        // Xóa các ảnh tạm thời nếu có
         session()->forget('temporary_images');
 
         return response()->json(['id' => $post->id], 200);
     }
+
+    public function getPostsByGroupId(int $id)
+    {
+        $post = Post::query()
+            ->join('group_post', 'posts.id', '=', 'group_post.post_id')
+            ->leftJoin('images', 'images.post_id', '=', 'posts.id')
+            ->where('group_post.group_id', $id)
+            ->groupBy('posts.id')
+            ->select('posts.*', DB::raw('MIN(images.path) as path'))
+            ->paginate(10);
+
+        return response()->json($post);
+    }
+
 
     public function getPost(int $id): JsonResponse
     {
@@ -55,7 +99,7 @@ class PostController extends Controller
     {
         $post = Post::query()
             ->selectRaw('posts.*, images.path as image_path, tags.name as tag_name')
-            ->join('images', 'images.post_id', '=', 'posts.id')
+            ->join('images', 'images.post_id', '=', 'posts.id', 'left')
             ->join('post_tag', 'post_tag.post_id', '=', 'posts.id')
             ->join('tags', 'tags.id', '=', 'post_tag.tag_id')
             ->where('tags.id', $id)
@@ -170,21 +214,21 @@ class PostController extends Controller
         return response()->json($post);
     }
 
-    public function getPostByTopicId(int $topicId): JsonResponse
+    public function getPostByForumId(int $topicId): JsonResponse
     {
         $post = DB::table('posts')
             ->join('post_tag', 'posts.id', '=', 'post_tag.post_id')
-            ->join('tags', 'post_tag.tag_id', '=', 'tags.id')
-            ->join('topics', 'tags.topic_id', '=', 'topics.id')
+            ->join('forums', 'posts.forum_id', '=', 'forums.id')
             ->join('images', 'posts.id', '=', 'images.post_id')
-            ->where('topics.id', $topicId)
-            ->select('posts.*', 'images.path', 'topics.name as topic_name')
+            ->groupBy('posts.id')
+            ->where('forums.id', $topicId)
+            ->select('posts.*', DB::raw('MIN(images.path) as path'), 'forums.name as forums_name')
             ->limit(3)
             ->get();
         return response()->json($post);
     }
 
-    public function getPostByTopicId_All(int $topicId): JsonResponse
+    public function getPostByForumId_All(int $topicId): JsonResponse
     {
         $post = DB::table('posts')
             ->join('post_tag', 'posts.id', '=', 'post_tag.post_id')

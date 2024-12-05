@@ -4,16 +4,22 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Tag extends Model
+class Group extends Model
 {
-    /** @use HasFactory<\Database\Factories\TagFactory> */
+    /** @use HasFactory<\Database\Factories\GroupFactory> */
     use HasFactory;
 
     protected $fillable = [
-        'id',
         'name',
+        'description',
+        'followers',
+        'coverPhotoUrl',
     ];
+
+    public function post() : HasMany
+    {
+        return $this->hasMany(Post::class);
+    }
 }

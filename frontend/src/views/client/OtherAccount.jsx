@@ -72,7 +72,7 @@ const MyAccount = () => {
                 style={{
                     position: 'relative',
                     top: '-50px',
-                    paddingLeft: '20px', // Tùy chỉnh khoảng cách bên trái
+                    paddingLeft: '20px',
                 }}
             >
                 <Image
@@ -82,10 +82,11 @@ const MyAccount = () => {
                         width: '200px',
                         height: '200px',
                         border: '6px solid white',
-                        marginRight: '20px', // Tạo khoảng cách giữa ảnh và text
+                        marginRight: '20px',
                     }}
                 />
                 <h1 style={{margin: 0}}>{user.name}</h1>
+                <Button variant="contained" style={{marginLeft: '10px'}}>Follow</Button>
             </div>
 
             <Row>

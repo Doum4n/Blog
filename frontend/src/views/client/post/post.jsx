@@ -8,11 +8,13 @@ import MostViewPost from "../component/post/mostViewPost";
 import PostTopic from "../component/topic/post_topic";
 import '../../../../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import 'quill/dist/quill.snow.css';
+import {Divider} from "@mui/material";
+import * as React from "react";
 
 const Post = () => {
 
-    const [title, setTitle] = useState();
-    const [content, setContent] = useState();
+    // const [title, setTitle] = useState();
+    // const [content, setContent] = useState();
     const [photoUrl, setUrl] = useState([]);
     const [comments, setComments] = useState([]);
     const [tagIds, setTagIds] = useState([]);
@@ -23,6 +25,12 @@ const Post = () => {
     const [commentContent, setCommentContent] = useState('');
     const [showSubComment, setShowSubComment] = useState(false);
 
+    const [postsByTopic, setPostsByTopic] = useState([]);
+    const [mostViewPosts, setMostViewPosts] = useState([]);
+    const [recentPosts, setRecentPosts] = useState([]);
+
+    const [user, setUser] = useState({});
+    const [post, setPost] = useState({});
 
     const [tags, setTags] = useState({});
 
@@ -38,71 +46,79 @@ const Post = () => {
         };
     });
 
+    useEffect(() => {
+        fetchData();
+        fetchIndependentData();
+    }, []);
+
     const { id } = useParams();
 
-    useEffect(() => {
-        fetch(`http://0.0.0.0/get-post/${id}`)
-            .then(response => {
-                if (!response.ok) throw new Error('Cant get post');
-                return response.json();
-            })
-            .then(data => {
-                setContent(data.post.content);
-                setTitle(data.post.title);
-                console.log('Title; ' + title)
-            })
-            .catch(error => console.error('There was a problem with the fetch operation:', error));
-    }, [id]);
+    const fetchData = async () => {
+        try {
+            if (id) {
+                // Thực hiện các lời gọi API song song
+                const [
+                    postResponse,
+                    commentsResponse,
+                    tagsResponse,
+                    imageResponse,
+                    likesResponse,
+                    userResponse,
+                    viewResponse
+                ] = await Promise.all([
+                    fetch(`http://0.0.0.0/get-post/${id}`).then(res => res.json()),
+                    fetch(`http://0.0.0.0/get/commentByPostId/${id}`).then(res => res.json()),
+                    fetch(`http://0.0.0.0/post/${id}/tags`).then(res => res.json()),
+                    fetch(`http://0.0.0.0/get-image/${id}`).then(res => res.json()),
+                    fetch(`http://0.0.0.0/post/${id}/likes`).then(res => res.json()),
+                    fetch(`http://0.0.0.0/user/post/${id}`).then(res => res.json()),
+                    fetch(`http://0.0.0.0/post/${id}/view`).then(res => res.json()),
+                ]);
 
-    useEffect(() => {
-        fetch(`http://0.0.0.0/get/commentByPostId/${id}`)
-            .then(response => {
-                if (!response.ok) throw new Error('Cant get comments');
-                return response.json();
-            })
-            .then(data => setComments(data))
-            .catch(error => console.error(error));
-    }, [id]);
+                // Cập nhật trạng thái từ kết quả API
+                // setContent(postResponse.post.content);
+                // setTitle(postResponse.post.title);
 
-    useEffect(() => {
-        fetch(`http://0.0.0.0/post/${id}/tags`)
-            .then(response => {
-                if (!response.ok) throw new Error('Cant get tags');
-                return response.json();
-            })
-            .then(data => {
-                data.forEach(tagId => getTagNameById(tagId));
-                setTagIds(data);
-                console.log(data);
-            })
-            .catch(error => console.error(error));
-    }, [id]);
+                setPost(postResponse.post);
 
-    const getTagNameById = (id) => {
-        fetch(`http://0.0.0.0/tag/${id}`)
-            .then(response => {
-                if (!response.ok) throw new Error('Cant get tags');
-                return response.json();
-            })
-            .then(tagName => {
-                setTags((prev) => ({ ...prev, [id]: tagName }));
-            })
-            .catch(error => console.error(error));
-    }
+                setComments(commentsResponse);
+                setTagIds(tagsResponse);
+                setUrl(imageResponse.url);
+                setLikes(likesResponse.likes);
+                setUser(userResponse);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await fetch(`http://0.0.0.0/get-image/${id}`);
-                if (!response.ok) throw new Error('Cant get image');
-                const data = await response.json();
-                setUrl(data.url);
-            } catch (error) {
-                console.error('There was a problem with the fetch operation:', error);
+                // Fetch tên thẻ (tags) song song
+                const tagsData = await Promise.all(
+                    tagsResponse.map(tagId =>
+                        fetch(`http://0.0.0.0/tag/${tagId}`).then(res => res.json())
+                    )
+                );
+                const tagsMap = tagsResponse.reduce((acc, tagId, index) => {
+                    acc[tagId] = tagsData[index];
+                    return acc;
+                }, {});
+                setTags(tagsMap);
             }
-        };
-        fetchData();
-    }, [id]);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
+
+    const fetchIndependentData = async () => {
+        try {
+            const [mostViewedResponse, postsByTopicResponse, recentPostsResponse] = await Promise.all([
+                fetch('http://0.0.0.0/post/most-viewed').then(res => res.json()),
+                fetch('http://0.0.0.0/post/forum/1').then(res => res.json()),
+                fetch('http://0.0.0.0/posts/recent').then(res => res.json()),
+            ]);
+
+            setMostViewPosts(mostViewedResponse.posts);
+            setPostsByTopic(postsByTopicResponse);
+            setRecentPosts(recentPostsResponse);
+        } catch (error) {
+            console.error('Error fetching independent data:', error);
+        }
+    };
 
     const GetComment = ({ comment }) => {
         const [username, setUsername] = useState("Unknown User");
@@ -182,33 +198,6 @@ const Post = () => {
             });
     }
 
-    useEffect(() => {
-        fetch(`http://0.0.0.0/post/${id}/likes`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Cant like this post!")
-                }
-                return response.json();
-            }).then(data => {
-                setLikes(data.likes);
-                console.log(data.likes);
-            }).catch(err => {
-                console.error(err);
-            });
-    }, [id]);
-
-    useEffect(() => {
-        fetch(`http://0.0.0.0/post/${id}/view`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Cant increase this post!")
-                }
-                return response.json();
-            }).catch(err => {
-                console.error(err);
-            });
-    }, [id]);
-
     const postComment = async () => {
         await fetch(`http://0.0.0.0/comment/create`,
             {
@@ -218,9 +207,10 @@ const Post = () => {
                 },
                 body: JSON.stringify({
                     user_id: user_id,
-                    post_id: id,
+                    id: id,
                     content: commentContent,
-                    parent_id: null
+                    parent_id: null,
+                    type: "post",
                 })
             }
         )
@@ -236,60 +226,6 @@ const Post = () => {
             });
     }
 
-    const [mostViewPosts, setMostViewPosts] = useState([]);
-
-    useEffect(() => {
-        fetch('http://0.0.0.0/post/most-viewed')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                setMostViewPosts(data.posts);
-                console.log('succes get most viewed post');
-            })
-            .catch(error => {
-                console.error('There was a problem with the fetch operation:', error);
-            });
-    }, []);
-
-    const [postsByTopic, setPostsByTopic] = useState([]);
-
-    useEffect(() => {
-        fetch('http://0.0.0.0/post/topic/1')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                setPostsByTopic(data);
-            })
-            .catch(error => {
-                console.error('There was a problem with the fetch operation:', error);
-            });
-    }, []);
-
-    const [recentPosts, setRecentPosts] = useState([]);
-    useEffect(() => {
-        fetch('http://0.0.0.0/posts/recent')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                setRecentPosts(data);
-            })
-            .catch(error => {
-                console.error('There was a problem with the fetch operation:', error);
-            });
-    }, []);
-
     const commentChange = (e) => {
         setCommentContent(e.target.value);
         console.log(commentContent);
@@ -300,17 +236,19 @@ const Post = () => {
             <Row>
                 <Col md={9}>
                     {/* //Header */}
-                    {title && <h1 className="mb-3">{title}</h1>}
-                    <Row className="mb-2">
+                    {post.title && <h1 className="mb-3">{post.title}</h1>}
+                    <Divider/>
+                    <Row className="my-2">
                         <div className="d-flex align-items-center">
                             <Image src='http://0.0.0.0/storage/images/piLImcuVtFrAne46IjKye6B8PCtNtO5CKyGGqfTE.png'
                                 roundedCircle style={{ width: '50px', height: '50px', float: 'left' }} className="me-1 mb-1" />
-                            <div style={{ float: 'left' }}>
-                                <h6>Username</h6>
-                                <h6>Update at</h6>
+                            <div style={{ float: 'left', marginLeft: '10px' }}>
+                                <h6>{user.name}</h6>
+                                <h6>{post.updated_at}</h6>
                             </div>
                         </div>
                     </Row>
+                    <Divider/>
 
                     {tagIds.map((tagId) => (
                         <Badge bg="primary" className="me-1">#{tags[tagId]}</Badge>
@@ -319,7 +257,7 @@ const Post = () => {
 
                     {/* //Content */}
                     <div className="mt-2">
-                        <div className="ql-editor" dangerouslySetInnerHTML={{ __html: (content) }} />
+                        <div className="ql-editor" dangerouslySetInnerHTML={{ __html: (post.content) }} />
                         <br />
                         <div>
                             {photoUrl.map((url, index) => (
@@ -366,12 +304,26 @@ const Post = () => {
                         {comments.map((comment) => (
                             <div key={comment.id}>
                                 {comment.parent_id === null ? (
-                                    <GetComment comment={comment} />
+                                    <Comment
+                                        updated_at={comment.updated_at}
+                                        nameUser={comment.user_name}
+                                        ImageSrc={comment.avatar}
+                                        comment={comment.content}
+                                        id={comment.id}
+                                        type="status"
+                                    />
                                 ) : null}
                                 {comment.children.length > 0 ? (
                                     comment.children.map((childComment) => (
-                                        <div style={{ marginLeft: '70px' }}>
-                                            <GetComment key={childComment.id} comment={childComment} className="ms-4" />
+                                        <div style={{marginLeft: '70px'}}>
+                                            <Comment
+                                                updated_at={childComment.updated_at}
+                                                nameUser={childComment.user_name}
+                                                ImageSrc={childComment.avatar}
+                                                comment={childComment.content}
+                                                id={childComment.id}
+                                                type="status"
+                                            />
                                         </div>
                                     ))
                                 ) : null}
@@ -380,17 +332,17 @@ const Post = () => {
                     </div>
                     {/* // */}
 
-                    <hr />
+                    <hr/>
 
-                    {/* //Related topic */}
+                    {/* //Related forum */}
                     <div>
                         <h2>{postsByTopic[0] && postsByTopic[0].topic_name}</h2>
                         {postsByTopic.map((post) => (
                             <div>
-                            <PostTopic
-                                id={post.id}
-                                title={post.title}
-                                image={post.path}
+                                <PostTopic
+                                    id={post.id}
+                                    title={post.title}
+                                    image={post.path}
                                 content={post.content}
                             />
                             </div>

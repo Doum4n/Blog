@@ -19,8 +19,11 @@ const MyAccount = () => {
     const [show, setShow] = useState(false)
     const navigate = useNavigate();
     const [username, setUsername] = useState('');
+
     const [photoUrl, setPhotoUrl] = useState('');
     const [uuid, setUuid] = useState('');
+    const [followers, setFollowers] = useState();
+
     const [posts, setPosts] = useState([]);
     const [statuses, setStatuses] = useState([]);
 
@@ -28,6 +31,8 @@ const MyAccount = () => {
     const [post_id, setPostId] = useState('');
     const [urls, setUrls] = useState({});
     const [Sharedposts, setSharedPosts] = useState([]);
+
+    const [user, setUser] = useState({});
 
     const LogOut = async () => {
         await signOut(auth);
@@ -48,6 +53,21 @@ const MyAccount = () => {
             console.error(err);
         };
     });
+
+    useEffect(() => {
+        if(uuid) {
+            fetch(`http://0.0.0.0/user/${uuid}`)
+                .then(Response => {
+                    if (!Response.ok)
+                        throw new Error("Cant get comment by user id: " + uuid);
+                    return Response.json();
+                }).then(data => {
+                setUser(data);
+            }).catch(err => {
+                console.error(err);
+            })
+        }
+    }, [uuid]);
 
     const getPostByUuid = async () => {
         try{
@@ -136,7 +156,10 @@ const MyAccount = () => {
                         marginRight: '20px', // Tạo khoảng cách giữa ảnh và text
                     }}
                 />
-                <h1 style={{margin: 0}}>{username}</h1>
+                <div>
+                    <h1 style={{margin: 0}}>{username}</h1>
+                    <p><b>followers: {user.followers}</b></p>
+                </div>
             </div>
 
             {/*<Tabs*/}
@@ -157,7 +180,7 @@ const MyAccount = () => {
                     <Divider />
                     <h2>Groups</h2>
                     <Divider />
-                    <h2>Followers</h2>
+                    <h2>Following</h2>
                 </Col>
                 <Col md={9}>
                     <h2>Created status</h2>

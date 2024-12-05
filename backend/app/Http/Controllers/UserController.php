@@ -43,6 +43,16 @@ class UserController extends Controller
         }
     }
 
+    public function getUserByPostId(int $postId): JsonResponse
+    {
+        $user = User::query()
+            ->join('posts', 'users.uuid', '=', 'posts.user_id')
+            ->where('posts.id', $postId)
+            ->first();
+
+        return response()->json($user);
+    }
+
     public function getUserById(string $uuid): JsonResponse
     {
         return response()->json(User::query()->where('uuid', $uuid)->first());

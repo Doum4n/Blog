@@ -21,8 +21,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'user/update/photo',
             'posts/delete',
             'users/delete',
-            '/topic/edit',
-            '/topic/delete',
+            '/forum/edit',
+            '/forum/delete',
             'comment/delete',
             'status/create'
         ]);

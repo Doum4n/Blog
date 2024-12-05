@@ -14,7 +14,8 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             UserSeeder::class,
-            TopicSeeder::class,
+            ForumSeeder::class,
+            GroupSeeder::class,
             TagSeeder::class,
             PostSeeder::class,
             StatusSeeder::class,
@@ -22,6 +23,7 @@ class DatabaseSeeder extends Seeder
             CommentSeeder::class,
             InteractionSeeder::class,
             PostTagSeeder::class,
+            GroupPostSeeder::class,
         ]);
     }
 }

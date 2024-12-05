@@ -10,7 +10,7 @@ const PostsByTopic = () => {
     const { id } = useParams();
 
     useEffect(() => {
-        fetch(`http://0.0.0.0/post/topic/${id}`)
+        fetch(`http://0.0.0.0/post/forum/${id}`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
