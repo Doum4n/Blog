@@ -1,7 +1,7 @@
 import {Col, Container, Row} from "react-bootstrap";
 import React, {useEffect, useState} from "react";
 import {useParams} from "react-router-dom";
-import PostTopic from "./component/topic/post_topic.jsx";
+import PostTopic from "./component/topic/post_forum.jsx";
 
 const PostsByTopic = () => {
     const [postsByTopic, setPostsByTopic] = useState([]);
@@ -32,7 +32,7 @@ const PostsByTopic = () => {
             <Row>
                 <Col>
                     <h1>
-                        {isLoading ? 'Loading...' : postsByTopic.length > 0 ? postsByTopic[1].topic_name : 'No posts found'}
+                        {isLoading ? 'Loading...' : postsByTopic.length > 0 ? postsByTopic[0].topic_name : 'No posts found'}
                     </h1>
                 </Col>
             </Row>

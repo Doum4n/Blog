@@ -1,6 +1,6 @@
 import {Col, Container, Row} from "react-bootstrap";
 import React, {useEffect, useState} from "react";
-import PostTopic from "./component/topic/post_topic.jsx";
+import PostTopic from "./component/topic/post_forum.jsx";
 import Button from "@mui/material/Button";
 
 const RecentPosts = () => {

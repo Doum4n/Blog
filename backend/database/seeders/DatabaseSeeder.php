@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Topic;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -20,10 +21,12 @@ class DatabaseSeeder extends Seeder
             PostSeeder::class,
             StatusSeeder::class,
             ImageSeeder::class,
+            TopicSeeder::class,
             CommentSeeder::class,
             InteractionSeeder::class,
             PostTagSeeder::class,
-            GroupPostSeeder::class,
+            FollowingSeeder::class,
+            TopicTagSeeder::class,
         ]);
     }
 }

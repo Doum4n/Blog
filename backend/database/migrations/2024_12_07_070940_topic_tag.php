@@ -11,11 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('group_post', function (Blueprint $table) {
-            $table->foreignId('group_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('post_id')->constrained()->cascadeOnDelete();
-            $table->primary(['group_id', 'post_id']);
-            $table->timestamps();
+        Schema::create('topic_tag', function (Blueprint $table) {
+           $table->foreignId('tag_id')->constrained('tags')->cascadeOnDelete();
+           $table->foreignId('topic_id')->constrained('topics')->cascadeOnDelete();
+           $table->primary(['tag_id', 'topic_id']);
         });
     }
 
@@ -24,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('group_post');
+        Schema::dropIfExists('topic_tag');
     }
 };

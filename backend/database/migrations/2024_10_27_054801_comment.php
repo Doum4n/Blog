@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('parent_id')->nullable();
             $table->unsignedBigInteger('status_id')->nullable();
+            $table->unsignedBigInteger('topic_id')->nullable();
             $table->unsignedBigInteger('post_id')->nullable();
             $table->foreignUuid('user_id')->constrained('users', 'uuid')->cascadeOnDelete();
            $table->foreign('status_id')->references('id')->on('statuses')->cascadeOnDelete();

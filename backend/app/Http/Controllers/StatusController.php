@@ -14,9 +14,10 @@ class StatusController extends Controller
     public function index(): JsonResponse
     {
         $status = Status::query()
-            ->selectRaw('statuses.*, users.name as user_name,users.photoUrl as avatar, images.path as image_path')
+            ->select('statuses.*', 'users.name as user_name','users.photoUrl as avatar', DB::raw('MIN(images.path) as image_path'))
             ->join('users', 'users.uuid', '=', 'statuses.user_id')
             ->join('images', 'images.status_id', '=', 'statuses.id')
+            ->groupBy('statuses.id')
             ->paginate(10);
         return Response()->json($status);
     }

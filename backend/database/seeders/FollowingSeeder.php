@@ -2,17 +2,17 @@
 
 namespace Database\Seeders;
 
-use App\Models\GroupPost;
+use App\Models\Following;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class GroupPostSeeder extends Seeder
+class FollowingSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        GroupPost::factory(20)->create();
+        Following::factory(30)->create();
     }
 }

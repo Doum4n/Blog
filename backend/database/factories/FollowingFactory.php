@@ -3,13 +3,14 @@
 namespace Database\Factories;
 
 use App\Models\Group;
-use App\Models\Post;
+use App\Models\Topic;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\GroupPost>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Following>
  */
-class GroupPostFactory extends Factory
+class FollowingFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -19,8 +20,10 @@ class GroupPostFactory extends Factory
     public function definition(): array
     {
         return [
-            'post_id' => Post::all()->random()->id,
+            'user_id' => User::all()->random()->uuid,
             'group_id' => Group::all()->random()->id,
+            'followed_user_id' => User::all()->random()->uuid,
+            'topic_id' => Topic::all()->random()->id,
         ];
     }
 }

@@ -24,7 +24,9 @@ return Application::configure(basePath: dirname(__DIR__))
             '/forum/edit',
             '/forum/delete',
             'comment/delete',
-            'status/create'
+            'status/create',
+            'topics/delete',
+            'groups/delete',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

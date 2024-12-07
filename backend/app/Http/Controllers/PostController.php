@@ -72,10 +72,10 @@ class PostController extends Controller
     public function getPostsByGroupId(int $id)
     {
         $post = Post::query()
-            ->join('group_post', 'posts.id', '=', 'group_post.post_id')
             ->leftJoin('images', 'images.post_id', '=', 'posts.id')
-            ->where('group_post.group_id', $id)
+            ->where('posts.group_id', $id)
             ->groupBy('posts.id')
+            ->orderBy('posts.created_at', 'desc')
             ->select('posts.*', DB::raw('MIN(images.path) as path'))
             ->paginate(10);
 
@@ -103,7 +103,7 @@ class PostController extends Controller
             ->join('post_tag', 'post_tag.post_id', '=', 'posts.id')
             ->join('tags', 'tags.id', '=', 'post_tag.tag_id')
             ->where('tags.id', $id)
-            ->get();
+            ->paginate(10);
 
         return response()->json($post);
     }

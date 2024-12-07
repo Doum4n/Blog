@@ -13,7 +13,7 @@ import AdminLayout from '../admin/home/home.jsx';
 import AdminPost from '../admin/posts/Posts.jsx';
 import DashBoard from '../admin/home/home.jsx';
 import UserManager from '../admin/users/UserManager.jsx';
-import TopicManagement from "../admin/forum/ForumManagement.jsx";
+import ForumManagement from "../admin/forum/ForumManagement.jsx";
 import CommentManagement from "../admin/comments/CommentManagement.jsx";
 import PostsByTopic from "./PostsByTopic.jsx";
 import RecentPosts from "./RecentPosts.jsx";
@@ -21,6 +21,10 @@ import Status from "./Status.jsx";
 import OtherAccount from "./OtherAccount.jsx";
 import Group from "./Group.jsx";
 import Groups from "./Groups.jsx";
+import Topic from "./component/Topic.jsx";
+import TopicManager from "../admin/topics/TopicManager.jsx";
+import GroupManager from "../admin/group/GroupManager.jsx";
+import HashTagManager from "../admin/hashtag/HashTagManager.jsx";
 const router = createBrowserRouter([
     {
         path: '/',
@@ -33,6 +37,10 @@ const router = createBrowserRouter([
             {
                 path: 'post/upload',
                 element: <PostUpload/>
+            },
+            {
+                path: '/topic/:id',
+                element: <Topic/>,
             },
             {
                 path: '/post/:id',
@@ -111,13 +119,25 @@ const router = createBrowserRouter([
     },
     ///admin/categories
     {
+        path: 'admin/forums',
+        element: <ForumManagement/>
+    },
+    {
         path: 'admin/topics',
-        element: <TopicManagement/>
+        element: <TopicManager/>
     },
     {
         path: 'admin/comments',
         element: <CommentManagement/>
     },
+    {
+        path: 'admin/groups',
+        element: <GroupManager/>
+    },
+    {
+        path: 'admin/hashtags',
+        element: <HashTagManager/>
+    }
 ])
 
 export default router;

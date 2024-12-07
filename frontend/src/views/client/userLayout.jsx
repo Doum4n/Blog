@@ -9,7 +9,8 @@ import { Image } from "react-bootstrap";
 import { auth } from '../../config/firebase'
 import { GoogleProvider } from "../../config/firebase";
 import img from '../../assets/user.png';
-import '../../../node_modules/bootstrap/dist/css/bootstrap.min.css';
+// import '../../../node_modules/bootstrap/dist/css/bootstrap.min.css';
+import {Menu, MenuItem} from "@mui/material";
 
 const Layout = () => {
 
@@ -19,6 +20,7 @@ const Layout = () => {
   const [show, setShow] = useState(false)
   const showModal = () => setShow(true);
   const closeModal = () => setShow(false);
+
 
   useEffect(() => {
     try {
@@ -52,6 +54,20 @@ const Layout = () => {
     navigate('/home');
   }
 
+  const handleOpen = () => {
+    setOpen(true);
+  }
+
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+    navigate('/post/upload');
+  };
+
   return (
     <>
       <Container className="mt-2">
@@ -63,9 +79,27 @@ const Layout = () => {
             </Navbar.Brand>
             <input className="rounded-4 border-1"></input>
           </Navbar.Collapse>
-          <Button className="me-2" onClick={PostHandler}>
+          <div className="me-2">
+          <Button
+              id="basic-button"
+              onClick={handleClick}
+          >
             Post
           </Button>
+          <Menu
+              id="basic-menu"
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleClose}
+              MenuListProps={{
+                'aria-labelledby': 'basic-button',
+              }}
+          >
+            <MenuItem onClick={handleClose}>Blog</MenuItem>
+            <MenuItem>Status</MenuItem>
+            <MenuItem>Topic</MenuItem>
+          </Menu>
+        </div>
           {
             <Card className="p-2 rounded-5 me-3">
               <div className="d-flex align-items-center justify-content-between">

@@ -33,7 +33,7 @@ import PropTypes from 'prop-types';
 import Comment from "../../client/component/comment";
 import { setStyleProp } from "html-react-parser/lib/utilities";
 
-const Topic = () => {
+const Forum = () => {
     const [topics, setTopics] = useState([]);
     const [preTopics, setPreTopics] = useState([]);
     const [column, setColumn] = useState([]);
@@ -550,4 +550,4 @@ const Topic = () => {
     );
 }
 
-export default Topic
+export default Forum

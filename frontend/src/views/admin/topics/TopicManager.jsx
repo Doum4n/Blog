@@ -6,17 +6,17 @@ import { Checkbox, InputLabel, ListItemText, MenuItem, OutlinedInput, Modal, Typ
 import Button from '@mui/material/Button';
 import Select from '@mui/material/Select';
 import FormControl from '@mui/material/FormControl';
-import ModalComponent from "../component/post_modal.jsx";
+import ModalComponent from "../component/topic_modal.jsx";
 import {useState, useEffect} from "react";
 
-const Post = () => {
-    const [posts, setPosts] = useState([]);
-    const [prePosts, setPrePosts] = useState([]);
+const Topic = () => {
+    const [topics, setTopics] = useState([]);
+    const [preTopics, setPreTopics] = useState([]);
     const [column, setColumn] = useState([]);
     const [action, setAction] = useState('');
     const [showFilter, setShowFilter] = useState(false);
 
-    const [selectedPost, setSelectedPost] = useState([]);
+    const [selectedTopic, setSelectedTopic] = useState([]);
 
     const handleChange = (event) => {
         setAction(event.target.value);
@@ -36,26 +36,27 @@ const Post = () => {
     const columns = [
         'Id',
         'Title',
-        'Username',
-        'Likes',
-        'Views',
-        'Create_at',
+        'Content',
+        'UserId',
+        'Followers',
+        'Open',
+        'Created_at',
         'Update_at',
     ]
 
-    const sortedColumn = column.sort((a, b) => { 
+    const sortedColumn = column.sort((a, b) => {
         return columns.indexOf(a) - columns.indexOf(b);
     });
 
-    const PostCell = ({ Id, Title, Username, Likes, Views, Create_at, Update_at }) => {
+    const PostCell = ({  Id, Title, Content, UserId, Followers, Open, Created_at, Update_at }) => {
         // for access
-        const rowData = { Id, Title, Username, Likes, Views, Create_at, Update_at };
+        const rowData = { Id, Title, Content, UserId, Followers, Open, Created_at, Update_at };
 
         const oncheckboxChange = (event) => {
             if (event.target.checked) {
-                setSelectedPost((prev) => [...prev, Id]);
+                setSelectedTopic((prev) => [...prev, Id]);
             } else {
-                setSelectedPost((prev) => prev.filter(id => id !== Id));
+                setSelectedTopic((prev) => prev.filter(id => id !== Id));
             }
         };
 
@@ -70,7 +71,7 @@ const Post = () => {
                         <ModalComponent Id={Id} />
                     )}
                     {action === 'Delete' && (
-                        <Checkbox onChange={oncheckboxChange} checked={selectedPost.includes(Id)} />
+                        <Checkbox onChange={oncheckboxChange} checked={selectedTopic.includes(Id)} />
                     )}
                 </th>
             </tr>
@@ -79,14 +80,14 @@ const Post = () => {
 
     // initial posts data
     useEffect(() => {
-        fetch('http://0.0.0.0/post/index')
+        fetch('http://0.0.0.0/topics/index')
             .then(response => {
                 if (!response.ok) throw new Error('Cant get post');
                 return response.json();
             })
             .then(data => {
-                setPosts(data.data);
-                setPrePosts(data.data);
+                setTopics(data.data);
+                setPreTopics(data.data);
             })
             .catch(error => console.error('There was a problem with the fetch operation:', error));
 
@@ -94,13 +95,13 @@ const Post = () => {
     }, [])
 
     const deletePost = () => {
-        fetch('http://0.0.0.0/posts/delete', {
+        fetch('http://0.0.0.0/topics/delete', {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                posts: selectedPost
+                topics: selectedTopic
             })
         }).then(response => {
             if (!response.ok) throw new Error('Cant delete post');
@@ -142,15 +143,15 @@ const Post = () => {
 
     // pagination
     useEffect(() => {
-        const url = `http://0.0.0.0/post/index?per_page=${rowsPerPage}&page=${[page]}`;
+        const url = `http://0.0.0.0/topics/index?per_page=${rowsPerPage}&page=${[page]}`;
         fetch(url)
             .then(response => {
                 if (!response.ok) throw new Error('Cannot fetch posts');
                 return response.json();
             })
             .then(data => {
-                setPosts(data.data);
-                setPrePosts(data.data);
+                setTopics(data.data);
+                setPreTopics(data.data);
             })
             .catch(error => console.error('Fetch operation failed:', error));
     }, [page, rowsPerPage]);
@@ -190,14 +191,14 @@ const Post = () => {
 
     useEffect(() => {
 
-        if (!posts || posts.length === 0) {
+        if (!topics || topics.length === 0) {
             return;
         }
-    
-        const filteredPosts = posts.filter((post) => {
+
+        const filteredPosts = topics.filter((post) => {
             const columnValue = post[fillterList.Column];
             let filterValue = fillterList.Value;
-    
+
             if (typeof columnValue === 'number') {
                 filterValue = Number(filterValue);
             } else if (typeof columnValue === 'boolean') {
@@ -205,20 +206,20 @@ const Post = () => {
             } else if (typeof columnValue === 'string') {
                 filterValue = String(filterValue);
             }
-    
+
             if(typeof columnValue === 'string' && operator === 'Contain')
                 return columnValue.includes(filterValue);
             else
                 return columnValue === filterValue;
         });
-    
+
         if (fillterList.Value.length === 0 || filteredPosts.length === 0) {
-            setPosts(prePosts);
+            setTopics(preTopics);
         } else {
-            setPosts(filteredPosts);
+            setTopics(filteredPosts);
         }
     }, [fillterList]);
-    
+
 
     const FillterPopper = () => {
 
@@ -227,9 +228,9 @@ const Post = () => {
             'id',
             'title',
             'content',
-            'likes',
             'user_id',
-            'views',
+            'followers',
+            'open',
             'created_at',
             'updated_at'
         ]
@@ -258,7 +259,7 @@ const Post = () => {
                     <List>
                         <ListItem disablePadding sx={{ bgcolor: 'white', "&:hover": {bgcolor: "white"} }}>
                             <FormControl fullWidth>
-                                 <div>
+                                <div>
                                     <InputLabel id="column-label" >Column</InputLabel>
                                     <Select
                                         id="column-select"
@@ -346,41 +347,42 @@ const Post = () => {
                     </div>
                     <Table striped bordered hover>
                         <thead>
-                            <tr>
-                                {sortedColumn.map((col) => (
-                                    <th key={col}>{col}</th>
-                                ))}
+                        <tr>
+                            {sortedColumn.map((col) => (
+                                <th key={col}>{col}</th>
+                            ))}
 
-                                <th>
-                                    <FormControl fullWidth>
-                                        <InputLabel id="select-label">Action</InputLabel>
-                                        <Select
-                                            labelId="select-label"
-                                            id="select"
-                                            value={action}
-                                            label="Action"
-                                            onChange={handleChange}
-                                            style={{ minWidth: '90px' }}
-                                        >
-                                            <MenuItem value={'View'}>View</MenuItem>
-                                            <MenuItem value={'Delete'}>Delete</MenuItem>
-                                        </Select>
-                                    </FormControl>
-                                </th>
-                            </tr>
+                            <th>
+                                <FormControl fullWidth>
+                                    <InputLabel id="select-label">Action</InputLabel>
+                                    <Select
+                                        labelId="select-label"
+                                        id="select"
+                                        value={action}
+                                        label="Action"
+                                        onChange={handleChange}
+                                        style={{ minWidth: '90px' }}
+                                    >
+                                        <MenuItem value={'View'}>View</MenuItem>
+                                        <MenuItem value={'Delete'}>Delete</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </th>
+                        </tr>
                         </thead>
                         <tbody>
-                            {posts.map((post) => (
-                                <PostCell
-                                    Id={post.id}
-                                    Title={post.title}
-                                    Username={post.name}
-                                    Likes={post.likes}
-                                    Views={post.views}
-                                    Create_at={post.created_at}
-                                    Update_at={post.updated_at}
-                                />
-                            ))}
+                        {topics.map((topic) => (
+                            <PostCell
+                                Id={topic.id}
+                                Title={topic.title}
+                                Content={topic.content}
+                                Open={topic.open}
+                                UserId={topic.userId}
+                                Followers={topic.followers}
+                                Create_at={topic.created_at}
+                                Update_at={topic.updated_at}
+                            />
+                        ))}
                         </tbody>
                     </Table>
                     <Button variant="contained" onClick={onPerfromClick}>Perform</Button>
@@ -391,4 +393,4 @@ const Post = () => {
     );
 }
 
-export default Post
+export default Topic

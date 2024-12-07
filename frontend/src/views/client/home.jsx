@@ -12,13 +12,14 @@ import Post from './component/post';
 import { ListGroup } from 'react-bootstrap';
 import SubPost from './component/sub_post';
 import { useNavigate } from 'react-router-dom';
-import PostTopic from './component/topic/post_topic';
+import PostForum from './component/topic/post_forum.jsx';
 import '../../../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import Status from "./component/status/status.jsx";
 import {Box, Divider, Modal} from "@mui/material";
 import SubComment from "./component/subcoment.jsx";
 import Button from "@mui/material/Button";
 import {auth} from "../../config/firebase.js";
+import Topic from "./component/topic/topic.jsx";
 
 function Home() {
   const post =
@@ -81,7 +82,6 @@ function Home() {
   const [mostViewPosts, setMostViewPosts] = useState([]);
   const [FeaturedPosts, setFeaturedPosts] = useState([]);
   const [PopularPosts, setPopularPosts] = useState([]);
-  const [topics, setTopics] = useState([]);
   const [postsByTopic, setPostsByTopic] = useState([]);
   const [userId, setUserId] = useState({});
   const [statuses, setStatuses] = useState([]);
@@ -91,6 +91,8 @@ function Home() {
   const [postNotFeaturedPosts, setPostNotFeaturedPosts] = useState([]);
   const [postsByHashtags, setPostsByHashtags] = useState([]);
   const [top4Groups, setTop4Groups] = useState([]);
+  const [forums, setForums] = useState([]);
+  const [topics, setTopics] = useState([]);
 
   useEffect(() => {
     try {
@@ -115,36 +117,39 @@ function Home() {
       fetch('http://0.0.0.0/post/forum/5'),
       fetch('http://0.0.0.0/status/index'),
       fetch('http://0.0.0.0/users/index'),
-        fetch('http://0.0.0.0/posts/hashtag/3'),
+        fetch('http://0.0.0.0/posts/hashtag/1'),
         fetch('http://0.0.0.0/group/top4'),
+        fetch('http://0.0.0.0/topics/index'),
     ])
-        .then(([mostViewedRes, PopularRes, featuredRes, notFeaturedRes, recentRes, topicsRes, postsByTopicRes, statusesRes, usersRes, postsbyHashTagRes, top4GroupsRes]) => {
+        .then(([mostViewedRes, PopularRes, featuredRes, notFeaturedRes, recentRes, forumsRes, postsByTopicRes, statusesRes, usersRes, postsbyHashTagRes, top4GroupsRes, topicsRes]) => {
           return Promise.all([
             mostViewedRes.json(),
             PopularRes.json(),
             featuredRes.json(),
             notFeaturedRes.json(),
             recentRes.json(),
-            topicsRes.json(),
+            forumsRes.json(),
             postsByTopicRes.json(),
             statusesRes.json(),
             usersRes.json(),
             postsbyHashTagRes.json(),
               top4GroupsRes.json(),
+              topicsRes.json(),
           ]);
         })
-        .then(([mostViewedData, popularData, featuredData, notFeaturedData, recentData, topicsData, postsByTopicData, statusesData, usersData, postsbyHashTagData, top4GroupsData]) => {
+        .then(([mostViewedData, popularData, featuredData, notFeaturedData, recentData, forumsData, postsByTopicData, statusesData, usersData, postsbyHashTagData, top4GroupsData, topicsData]) => {
           setMostViewPosts(mostViewedData.posts);
           setPopularPosts(popularData.posts);
           setFeaturedPosts(featuredData);
           setPostNotFeaturedPosts(notFeaturedData);
           setRecentPosts(recentData);
-          setTopics(topicsData);
+          setForums(forumsData);
           setPostsByTopic(postsByTopicData);
           setStatuses(statusesData.data);
           setUsers(usersData.data);
-          setPostsByHashtags(postsbyHashTagData)
+          setPostsByHashtags(postsbyHashTagData.data);
           setTop4Groups(top4GroupsData);
+          setTopics(topicsData.data);
 
           setIsLoading(false);
         })
@@ -372,7 +377,7 @@ function Home() {
             <Row>
               <h1>Forums</h1>
               <div style={{display: 'flex', flexDirection: 'row', gap: '2px', flex: '1', overflowX: 'auto'}}>
-                {topics.map((topic) => (
+                {forums.map((topic) => (
                     <div style={{marginBottom: '20px'}}>
                       <Button variant={'contained'} onClick={() => onclick(topic.id)}>{topic.name}</Button>
                     </div>
@@ -413,7 +418,7 @@ function Home() {
 
               <Col className='mt-3'>
                 {postsByTopic.map((post) => (
-                    <PostTopic
+                    <PostForum
                         Key={post.id}
                         id={post.id}
                         title={post.title}
@@ -502,7 +507,7 @@ function Home() {
             <Divider/>
 
             {/* Posts by hashtag */}
-            <Row>
+            {/*<Row style={{position: 'static'}}>*/}
               {isLoading ? (
                   "Loading..."
               ) : postsByHashtags.length > 0 ? (
@@ -569,9 +574,24 @@ function Home() {
                 </div>
                 <Button variant="contained">More</Button>
               </div>
-            </Row>
+            {/*</Row>*/}
 
             {/*  */}
+
+            <Row>
+              <div>
+                {topics.map((topic) => (
+                    <Topic
+                      title={topic.title}
+                      content={topic.content}
+                      username={topic.username}
+                      key={topic.id}
+                      id={topic.id}
+                      created_at={topic.created_at}
+                    />
+                ))}
+              </div>
+            </Row>
 
           </Col>
 
@@ -609,7 +629,7 @@ function Home() {
               <Col className="d-flex gap-2 flex-column">
                 <h1>Influencer</h1>
                 {users.map((user) => (
-                    <div className="d-flex gap-2 flex-row align-items-center">
+                    <div className="d-flex gap-2 flex-row align-items-center" onClick={() => navigate(`/user/${user.uuid}`)}>
                       <img src={user.photoUrl} style={{height: '60px', width: '60px', borderRadius: '50%'}}/>
                       <h3>{user.name}</h3>
                     </div>
@@ -622,17 +642,16 @@ function Home() {
 
             {/*Groups*/}
             <div>
-              <h2>Groups</h2>
-              <div style={{
+              <div className="sticky-top" style={{
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '10px',
                 alignItems: 'center',
                 backgroundColor: '#1c1c1c',
                 padding: '10px',
-                borderRadius: '10px'
+                borderRadius: '10px',
               }}>
-                <h2 style={{color: 'white', margin: '0 0 10px 0'}}>Cộng đồng</h2>
+                <h2 style={{color: 'white', margin: '0 0 10px 0'}}>Community</h2>
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(2, 1fr)',

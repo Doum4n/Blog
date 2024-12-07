@@ -18,6 +18,8 @@ return new class extends Migration
             $table->integer('likes')->default(0);
             $table->integer('comments')->default(0);
             $table->foreignId('forum_id')->constrained()->onDelete('cascade');
+            $table->unsignedBigInteger('group_id')->nullable();
+            $table->foreign('group_id')->references('id')->on('groups')->onDelete('cascade');
             $table->foreignUuid('user_id')->constrained('users', 'uuid')->cascadeOnDelete();
             $table->integer('views')->default(0);
             $table->timestamps();

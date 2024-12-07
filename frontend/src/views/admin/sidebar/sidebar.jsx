@@ -16,6 +16,13 @@ const SideBar = () => {
                         </li>
                     </Link>
                     <p><b>Data</b></p>
+                    <Link to="/admin/hashtags" style={{textDecoration: "none"}}>
+                        <li>
+                        <span>
+                            Hashtag
+                        </span>
+                        </li>
+                    </Link>
                     <li>
                         <span>
                             Faultfinding
@@ -28,6 +35,13 @@ const SideBar = () => {
                             </span>
                         </li>
                     </Link>
+                    <Link to="/admin/forums" style={{textDecoration: "none"}}>
+                        <li>
+                        <span>
+                            Forums
+                        </span>
+                        </li>
+                    </Link>
                     <Link to="/admin/topics" style={{textDecoration: "none"}}>
                         <li>
                         <span>
@@ -35,11 +49,13 @@ const SideBar = () => {
                         </span>
                         </li>
                     </Link>
-                    <li>
+                    <Link to="/admin/groups" style={{textDecoration: "none"}}>
+                        <li>
                         <span>
                             Community
                         </span>
-                    </li>
+                        </li>
+                    </Link>
                     <p><b>Users and interactions</b></p>
                     <Link to="/admin/users" style={{textDecoration: "none"}}>
                         <li>

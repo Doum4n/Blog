@@ -16,6 +16,7 @@ class Comment extends Model
         'user_id',
         'post_id',
         'status_id',
+        'topic_id',
         'content',
         'parent_id', //comment parent
     ];

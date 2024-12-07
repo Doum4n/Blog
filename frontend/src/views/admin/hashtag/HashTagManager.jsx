@@ -6,17 +6,18 @@ import { Checkbox, InputLabel, ListItemText, MenuItem, OutlinedInput, Modal, Typ
 import Button from '@mui/material/Button';
 import Select from '@mui/material/Select';
 import FormControl from '@mui/material/FormControl';
-import ModalComponent from "../component/post_modal.jsx";
+import ModalComponent from "../component/tag_modal.jsx";
 import {useState, useEffect} from "react";
 
-const Post = () => {
-    const [posts, setPosts] = useState([]);
-    const [prePosts, setPrePosts] = useState([]);
+const HashTag = () => {
+    const [tags, setTags] = useState([]);
+    const [preTags, setPreTags] = useState([]);
     const [column, setColumn] = useState([]);
     const [action, setAction] = useState('');
     const [showFilter, setShowFilter] = useState(false);
+    const [loading, setLoading] = useState(true);
 
-    const [selectedPost, setSelectedPost] = useState([]);
+    const [selectedTag, setSelectedTag] = useState([]);
 
     const handleChange = (event) => {
         setAction(event.target.value);
@@ -35,42 +36,46 @@ const Post = () => {
     // using to display table header
     const columns = [
         'Id',
-        'Title',
-        'Username',
-        'Likes',
-        'Views',
-        'Create_at',
+        'Name',
+        'Created_at',
         'Update_at',
     ]
 
-    const sortedColumn = column.sort((a, b) => { 
+    const sortedColumn = column.sort((a, b) => {
         return columns.indexOf(a) - columns.indexOf(b);
     });
 
-    const PostCell = ({ Id, Title, Username, Likes, Views, Create_at, Update_at }) => {
+    const PostCell = ({  Id, Name, Created_at, Update_at, PostCount, TopicCount }) => {
         // for access
-        const rowData = { Id, Title, Username, Likes, Views, Create_at, Update_at };
+        const rowData = {  Id, Name, Created_at, Update_at };
 
         const oncheckboxChange = (event) => {
             if (event.target.checked) {
-                setSelectedPost((prev) => [...prev, Id]);
+                setSelectedTag((prev) => [...prev, Id]);
             } else {
-                setSelectedPost((prev) => prev.filter(id => id !== Id));
+                setSelectedTag((prev) => prev.filter(id => id !== Id));
             }
         };
 
         return (
             <tr>
-                {sortedColumn.map((col) => (
+                {loading ? "Loading..." : sortedColumn.map((col) => (
                     <td key={col}>{rowData[col]}</td>
                 ))}
 
                 <th className="d-flex justify-content-center">
                     {action === 'View' && (
-                        <ModalComponent Id={Id} />
+                        <ModalComponent
+                            Id={Id}
+                            Name={Name}
+                            Created_at={Created_at}
+                            Updated_at={Update_at}
+                            PostCount={PostCount}
+                            TopicCount={TopicCount}
+                        />
                     )}
                     {action === 'Delete' && (
-                        <Checkbox onChange={oncheckboxChange} checked={selectedPost.includes(Id)} />
+                        <Checkbox onChange={oncheckboxChange} checked={selectedTag.includes(Id)} />
                     )}
                 </th>
             </tr>
@@ -78,29 +83,34 @@ const Post = () => {
     };
 
     // initial posts data
-    useEffect(() => {
-        fetch('http://0.0.0.0/post/index')
+    useEffect( () => {
+         fetch('http://0.0.0.0/tag/index')
             .then(response => {
                 if (!response.ok) throw new Error('Cant get post');
                 return response.json();
             })
             .then(data => {
-                setPosts(data.data);
-                setPrePosts(data.data);
+                setTags(data.data);
+                setPreTags(data.data);
+
+                setLoading(false);
             })
-            .catch(error => console.error('There was a problem with the fetch operation:', error));
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error)
+                setLoading(false);
+            });
 
         setColumn(columns);
     }, [])
 
     const deletePost = () => {
-        fetch('http://0.0.0.0/posts/delete', {
+        fetch('http://0.0.0.0/topics/delete', {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                posts: selectedPost
+                topics: selectedTag
             })
         }).then(response => {
             if (!response.ok) throw new Error('Cant delete post');
@@ -142,15 +152,15 @@ const Post = () => {
 
     // pagination
     useEffect(() => {
-        const url = `http://0.0.0.0/post/index?per_page=${rowsPerPage}&page=${[page]}`;
+        const url = `http://0.0.0.0/tag/index?per_page=${rowsPerPage}&page=${[page]}`;
         fetch(url)
             .then(response => {
                 if (!response.ok) throw new Error('Cannot fetch posts');
                 return response.json();
             })
             .then(data => {
-                setPosts(data.data);
-                setPrePosts(data.data);
+                setTags(data.data);
+                setPreTags(data.data);
             })
             .catch(error => console.error('Fetch operation failed:', error));
     }, [page, rowsPerPage]);
@@ -190,14 +200,14 @@ const Post = () => {
 
     useEffect(() => {
 
-        if (!posts || posts.length === 0) {
+        if (!tags || tags.length === 0) {
             return;
         }
-    
-        const filteredPosts = posts.filter((post) => {
+
+        const filteredPosts = tags.filter((post) => {
             const columnValue = post[fillterList.Column];
             let filterValue = fillterList.Value;
-    
+
             if (typeof columnValue === 'number') {
                 filterValue = Number(filterValue);
             } else if (typeof columnValue === 'boolean') {
@@ -205,31 +215,27 @@ const Post = () => {
             } else if (typeof columnValue === 'string') {
                 filterValue = String(filterValue);
             }
-    
+
             if(typeof columnValue === 'string' && operator === 'Contain')
                 return columnValue.includes(filterValue);
             else
                 return columnValue === filterValue;
         });
-    
+
         if (fillterList.Value.length === 0 || filteredPosts.length === 0) {
-            setPosts(prePosts);
+            setTags(preTags);
         } else {
-            setPosts(filteredPosts);
+            setTags(filteredPosts);
         }
     }, [fillterList]);
-    
+
 
     const FillterPopper = () => {
 
         // columns in database
         const realColumnName = [
             'id',
-            'title',
-            'content',
-            'likes',
-            'user_id',
-            'views',
+            'name',
             'created_at',
             'updated_at'
         ]
@@ -258,7 +264,7 @@ const Post = () => {
                     <List>
                         <ListItem disablePadding sx={{ bgcolor: 'white', "&:hover": {bgcolor: "white"} }}>
                             <FormControl fullWidth>
-                                 <div>
+                                <div>
                                     <InputLabel id="column-label" >Column</InputLabel>
                                     <Select
                                         id="column-select"
@@ -346,41 +352,41 @@ const Post = () => {
                     </div>
                     <Table striped bordered hover>
                         <thead>
-                            <tr>
-                                {sortedColumn.map((col) => (
-                                    <th key={col}>{col}</th>
-                                ))}
+                        <tr>
+                            {sortedColumn.map((col) => (
+                                <th key={col}>{col}</th>
+                            ))}
 
-                                <th>
-                                    <FormControl fullWidth>
-                                        <InputLabel id="select-label">Action</InputLabel>
-                                        <Select
-                                            labelId="select-label"
-                                            id="select"
-                                            value={action}
-                                            label="Action"
-                                            onChange={handleChange}
-                                            style={{ minWidth: '90px' }}
-                                        >
-                                            <MenuItem value={'View'}>View</MenuItem>
-                                            <MenuItem value={'Delete'}>Delete</MenuItem>
-                                        </Select>
-                                    </FormControl>
-                                </th>
-                            </tr>
+                            <th>
+                                <FormControl fullWidth>
+                                    <InputLabel id="select-label">Action</InputLabel>
+                                    <Select
+                                        labelId="select-label"
+                                        id="select"
+                                        value={action}
+                                        label="Action"
+                                        onChange={handleChange}
+                                        style={{ minWidth: '90px' }}
+                                    >
+                                        <MenuItem value={'View'}>View</MenuItem>
+                                        <MenuItem value={'Delete'}>Delete</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </th>
+                        </tr>
                         </thead>
                         <tbody>
-                            {posts.map((post) => (
-                                <PostCell
-                                    Id={post.id}
-                                    Title={post.title}
-                                    Username={post.name}
-                                    Likes={post.likes}
-                                    Views={post.views}
-                                    Create_at={post.created_at}
-                                    Update_at={post.updated_at}
-                                />
-                            ))}
+                        {tags.map((tag) => (
+                            <PostCell
+                                key={tag.id}
+                                Id={tag.id}
+                                Name={tag.name}
+                                Created_at={new Date(tag.created_at).toLocaleString()}
+                                Update_at={new Date(tag.updated_at).toLocaleString()}
+                                PostCount={tag.post_count}
+                                TopicCount={tag.topic_count}
+                            />
+                        ))}
                         </tbody>
                     </Table>
                     <Button variant="contained" onClick={onPerfromClick}>Perform</Button>
@@ -391,4 +397,4 @@ const Post = () => {
     );
 }
 
-export default Post
+export default HashTag

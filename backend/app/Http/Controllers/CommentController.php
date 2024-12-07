@@ -77,6 +77,7 @@ class CommentController extends Controller
                 'content' => $request->input('content'),
                 'post_id' => $request->input('id'),
                 'status_id' => null,
+                'topic_id' => null,
             ]);
         }else if($request->input('type') == 'status') {
             Comment::factory()->createOne([
@@ -85,6 +86,16 @@ class CommentController extends Controller
                 'content' => $request->input('content'),
                 'status_id' => $request->input('id'),
                 'post_id' => null,
+                'topic_id' => null,
+            ]);
+        }else if ($request->input('type') == 'topic') {
+            Comment::factory()->createOne([
+                'user_id' => $request->input('user_id'),
+                'parent_id' => $request->input('parent_id'),
+                'content' => $request->input('content'),
+                'status_id' => null,
+                'post_id' => null,
+                'topic_id' => $request->input('id'),
             ]);
         }
 
@@ -105,5 +116,17 @@ class CommentController extends Controller
             ->select('comments.*', 'users.name', 'users.photoUrl')
             ->get();
         return response()->json($comment);
+    }
+
+    public function getCommentsByTopicId(int $id): JsonResponse
+    {
+        $comments = Comment::query()->with('children')
+            ->join('topics', 'comments.topic_id', '=', 'topics.id')
+            ->join('users', 'comments.user_id', '=', 'users.uuid')
+            ->where('comments.topic_id', $id)
+            ->select('comments.*', 'users.name as username', 'users.photoUrl as userPhotoUrl')
+            ->get();
+
+        return response()->json($comments);
     }
 }

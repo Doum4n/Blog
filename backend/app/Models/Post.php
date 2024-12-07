@@ -18,6 +18,7 @@ class Post extends Model
         'content',
         'user_id',
         'forum_id',
+        'group_id',
         'likes',
         'comments',
         'views',

@@ -1,4 +1,4 @@
-import {Col, Container, Form, Image, Row} from "react-bootstrap";
+import {Carousel, Col, Container, Form, Image, Row} from "react-bootstrap";
 import {useParams} from "react-router-dom";
 import {useEffect, useRef, useState} from "react";
 import Button from "@mui/material/Button";
@@ -7,6 +7,7 @@ import SubComment from "./component/subcoment.jsx";
 import Comment from "./component/comment.jsx";
 import {auth} from "../../config/firebase.js";
 import * as React from "react";
+import banner from "../../assets/banner.png";
 
 const Status = () => {
     const [status, setStatus] = useState({});
@@ -137,13 +138,26 @@ const Status = () => {
         <Container>
             <Row>
                 <Col className="bg-dark d-flex flex-row align-items-center justify-content-center overflow-x-auto">
+                    <Carousel data-bs-theme="dark">
                     {imagePaths.map((path) => (
-                        <img src={`http://0.0.0.0/storage/${path}`} className="w-100 h-100" key={path}/>
+                            <Carousel.Item key={path}>
+                                <img src={path} style={{height: '100%'}}/>
+                            </Carousel.Item>
                     ))}
+                    </Carousel>
                 </Col>
                 <Col className="bg-secondary-subtle p-4" style={{overflowY: "auto"}}>
-                    <Image src={status.avatar} roundedCircle style={{ width: '50px', height: '50px', marginBottom: '10px', marginRight: '10px' }} />
-                    {status.user_name}
+                    <div style={{display: "flex", flexDirection: "row"}}>
+                        <div>
+                            <Image src={status.avatar} roundedCircle style={{ width: '50px', height: '50px', marginBottom: '10px', marginRight: '10px' }} />
+                        </div>
+                        <div style={{display: "flex", flexDirection: "column"}}>
+                            {status.user_name}
+                            <br/>
+                            {new Date(status.created_at).toLocaleString()}
+                        </div>
+                    </div>
+
                     <br/>
                     {status.content}
                     <br/>

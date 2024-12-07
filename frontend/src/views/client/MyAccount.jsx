@@ -123,16 +123,6 @@ const MyAccount = () => {
 
     }
 
-    const handleSelect = (key) => {
-        if (key === 'post') {
-            getPostByUuid();
-        } else if (key === 'comment') {
-            getCommentByUuid();
-        } else if (key == 'share') {
-            getSharedPosts();
-        }
-    };
-
     return (
         <Container className="d-flex flex-column w-75">
             <div className="d-flex flex-column">
@@ -162,15 +152,6 @@ const MyAccount = () => {
                 </div>
             </div>
 
-            {/*<Tabs*/}
-            {/*    defaultActiveKey="profile"*/}
-            {/*    id="uncontrolled-tab-example"*/}
-            {/*    className="mb-3" style={{position: 'relative', left: '190px'}}*/}
-            {/*    onSelect={handleSelect}*/}
-            {/*>*/}
-            {/*    <Tab eventKey="home" title="Overview">*/}
-            {/*        Tab content for Home*/}
-            {/*    </Tab>*/}
             <Row>
                 <Col md={3} style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
                     <h2>Status</h2>
@@ -209,45 +190,6 @@ const MyAccount = () => {
                     ))}
                 </Col>
             </Row>
-
-            {/*<Tab eventKey="comment" title="Comment">*/}
-
-                {/*    {comments.map((comment) => (*/}
-                {/*        <div>*/}
-                {/*            {posts.filter(post => post.id === comment.post_id).map((post) => (*/}
-                {/*                <Post_by_user*/}
-                {/*                    id={post.id}*/}
-                {/*                    title={post.title}*/}
-                {/*                    image={`http://0.0.0.0/storage/${post.path}`}*/}
-                {/*                    likes={post.likes}*/}
-                {/*                    comments={post.comments}*/}
-                {/*                    description={post.content}*/}
-                {/*                    key={post.id}*/}
-                {/*                />*/}
-                {/*            ))}*/}
-
-                {/*            <Comment_by_user*/}
-                {/*                key={comment.id}*/}
-                {/*                title={comment.post_id}*/}
-                {/*                comment={comment.content}*/}
-                {/*            />*/}
-                {/*        </div>*/}
-
-                {/*    ))}*/}
-
-                {/*</Tab>*/}
-                {/*<Tab eventKey="share" title="share">*/}
-                {/*    {Sharedposts.map((post) => (*/}
-                {/*        <SharedPost*/}
-                {/*            id={post.id}*/}
-                {/*            title={post.title}*/}
-                {/*            image={`http://0.0.0.0/storage/${urls[post.id]}`}*/}
-                {/*            description={post.content}*/}
-                {/*            key={post.id}*/}
-                {/*        />*/}
-                {/*    ))}*/}
-                {/*</Tab>*/}
-            {/*</Tabs>*/}
         </Container>
     );
 }

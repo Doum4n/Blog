@@ -5,7 +5,7 @@ import { Button, ButtonGroup, Container, Form, Image, Row, Col, Badge } from "re
 import Comment from "../component/comment";
 import { auth } from "../../../config/firebase";
 import MostViewPost from "../component/post/mostViewPost";
-import PostTopic from "../component/topic/post_topic";
+import PostTopic from "../component/topic/post_forum.jsx";
 import '../../../../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import 'quill/dist/quill.snow.css';
 import {Divider} from "@mui/material";
