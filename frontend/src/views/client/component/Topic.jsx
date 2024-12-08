@@ -101,7 +101,7 @@ const Topic = () => {
                         <Button variant="outlined">Follow</Button>
                         <Divider/>
                         <h4>Tags</h4>
-                        <div style={{display: 'flex', flexDirection: 'row', gap: '5px'}}>
+                        <div style={{display: 'flex', flexDirection: 'row', gap: '5px', width: '100%'}}>
                             {loading ? "Loading..." : topic.tag_name ? topic.tag_name.split(',').map(tag => (
                                 <Chip variant="filled" label={tag} color="info" />
                             )) : null}

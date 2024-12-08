@@ -9,6 +9,7 @@ import Post_by_user from "../../client/component/account/post_by_user.jsx";
 const ModalComponent = ({Id, Name, Created_at, Updated_at, PostCount, TopicCount}) => {
     const [state, setState] = useState({ open: false, selectId: null });
     const [posts, setPosts] = useState([]);
+    const [topics, setTopics] = useState([]);
 
     const [value, setValue] = useState(0);
 
@@ -23,7 +24,7 @@ const ModalComponent = ({Id, Name, Created_at, Updated_at, PostCount, TopicCount
         setState({ ...state, open: false });
     };
 
-    // Get comments
+    // Get posts
     useEffect(() => {
         if (!state.selectId) return;
 
@@ -34,6 +35,23 @@ const ModalComponent = ({Id, Name, Created_at, Updated_at, PostCount, TopicCount
             })
             .then(data => {
                 setPosts(data.data);
+            })
+            .catch(error => console.error('There was a problem with the fetch operation:', error));
+
+    }, [state.selectId]);
+    //
+
+    // Get topics
+    useEffect(() => {
+        if (!state.selectId) return;
+
+        fetch(`http://0.0.0.0/topics/tag/${state.selectId}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Cant get post');
+                return response.json();
+            })
+            .then(data => {
+                setTopics(data.data);
             })
             .catch(error => console.error('There was a problem with the fetch operation:', error));
 
@@ -115,8 +133,15 @@ const ModalComponent = ({Id, Name, Created_at, Updated_at, PostCount, TopicCount
                         </div>
                     </CustomTabPanel>
                     <CustomTabPanel value={value} index={2}>
+                        <div style={{display: "flex", flexDirection: "column", marginBottom: '10px'}}>
+                            <TextField label="Search"></TextField>
+                        </div>
                         <div>
-
+                            {topics.map((topic) => (
+                                <div>
+                                    {topic.title}
+                                </div>
+                            ))}
                         </div>
                     </CustomTabPanel>
                     {/*  */}

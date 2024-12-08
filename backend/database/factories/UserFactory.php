@@ -20,6 +20,10 @@ class UserFactory extends Factory
         return [
             'uuid' => $this->faker->uuid(),
             'name' => $this->faker->name(),
+            'age' => $this->faker->numberBetween(18, 30),
+            'gender' => $this->faker->randomElement(['male', 'female']),
+            'biography' => $this->faker->text(),
+            'date_of_birth' => $this->faker->date(),
             'photoUrl' => $this->faker->imageUrl(),
             'email' => $this->faker->unique()->safeEmail(),
             'email_verified_at' => now(),

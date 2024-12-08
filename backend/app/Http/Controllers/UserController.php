@@ -70,6 +70,18 @@ class UserController extends Controller
         return response()->json('Create user successfully!');
     }
 
+    public function getFollowedUsers(string $uuid): JsonResponse
+    {
+        $users = User::query()
+            ->join('followings', 'users.uuid', '=', 'followings.followed_user_id') // Liên kết với người dùng được theo dõi
+            ->where('followings.user_id', $uuid) // Điều kiện: user_id là UUID của người dùng đang theo dõi
+            ->select('users.name', 'users.photoUrl') // Lấy thông tin của người dùng được theo dõi
+            ->get();
+
+        return response()->json($users);
+    }
+
+
     public function getPhotoById($uuid): JsonResponse
     {
         $photo = User::query()->where('uuid', $uuid)->value('photoUrl');

@@ -168,12 +168,6 @@ const UploadFile = () => {
   const handleChoseForumOpen = () => setShowChoseForum(true);
   const handleChoseForumClose = () => setShowChoseForum(false);
 
-  const [selectedForum, setSelectedForum] = useState("Form");
-  const handleFormChange = (e) => {
-    e.preventDefault();
-    setSelectedForum(e.target.value);
-  }
-
   const [forums, setForums] = useState([]);
 
   useEffect(() => {

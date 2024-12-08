@@ -14,10 +14,14 @@ class User extends Model
     protected  $fillable = [
         'uuid',
         'name',
+        'age',
+        'gender',
+        'biography',
+        'date_of_birth',
         'photoUrl',
         'email',
         'email_verified_at',
-        'followers'
+        'followers',
     ];
 
     protected $hidden = [

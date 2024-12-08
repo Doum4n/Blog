@@ -56,4 +56,16 @@ class GroupController extends Controller
 
         return response()->json($group);
     }
+
+    public function getGroupsByUserId(string $id)
+    {
+        $groups = Group::query()
+            ->join('followings', 'groups.id', '=', 'followings.group_id')
+            ->join('users', 'users.uuid', '=', 'followings.user_id')
+            ->where('followings.user_id', $id)
+            ->take(4)
+            ->get();
+
+        return response()->json($groups);
+    }
 }

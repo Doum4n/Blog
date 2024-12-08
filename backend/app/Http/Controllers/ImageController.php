@@ -35,14 +35,25 @@ class ImageController extends Controller
         $paths = $request->input('paths');
         $createdPaths = [];
 
-        foreach ($paths as $path){
+        if(is_array($paths)) {
+            foreach ($paths as $path){
+                $image = Image::query()->create([
+                    'status_id' => $request->input('status_id'),
+                    'post_id' => $request->input('post_id'),
+                    'topic_id' => $request->input('topic_id'),
+                    'path' => $path
+                ]);
+                $createdPaths[] = $image->path;
+            }
+        }else{
             $image = Image::query()->create([
                 'status_id' => $request->input('status_id'),
                 'post_id' => $request->input('post_id'),
-                'path' => $path
+                'topic_id' => $request->input('topic_id'),
+                'path' => $request->input('path'),
             ]);
-            $createdPaths[] = $image->path;
 
+            return response()->json(['path' => $image->path]);
         }
 
         return response()->json(['paths' => $createdPaths]);

@@ -27,6 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'status/create',
             'topics/delete',
             'groups/delete',
+            'topic/create',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

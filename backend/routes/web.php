@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\FollowingController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\HashTagController;
 use App\Http\Controllers\ImageController;
@@ -84,6 +85,7 @@ Route::middleware([CorsMiddleware::class])->group(function () {
     Route::delete('users/delete', [UserController::class, 'deleteUser']);
     Route::get('user/{id}', [UserController::class, 'getUserById']);
     Route::get('user/post/{id}', [UserController::class, 'getUserByPostId']);
+    Route::get('user/follow/users/{id}', [UserController::class, 'getFollowedUsers']);
 
     Route::put('interaction', [interactionController::class, 'update']);
     Route::get('interact/share/{id}', [interactionController::class, 'getPostsSharedByUser']);
@@ -107,8 +109,11 @@ Route::middleware([CorsMiddleware::class])->group(function () {
     Route::get('group/index', [GroupController::class, 'index']);
     Route::delete('groups/delete', [GroupController::class, 'deleteGroup']);
     Route::get('users/group/{id}', [GroupController::class, 'getUsersByGroupId']);
+    Route::get('groups/user/{id}', [GroupController::class, 'getGroupsByUserId']);
 
     Route::get('tag/index', [HashTagController::class, 'index']);
+
+    Route::put('follow', [FollowingController::class, 'follow']);
 
     //ADMIN
     Route::get('/statistical', [AdminController::class, 'getStatistical']);
@@ -120,6 +125,8 @@ Route::middleware([CorsMiddleware::class])->group(function () {
     Route::get('topic/{id}', [TopicController::class, 'getTopicById']);
     Route::get('topics/recent', [TopicController::class, 'getRecentTopics']);
     Route::delete('topics/delete', [TopicController::class, 'deleteTopic']);
+    Route::get('topics/tag/{id}', [TopicController::class, 'getTopicsByTagId']);
+    Route::post('topic/create', [TopicController::class, 'createTopic']);
 
     Route::get('comments/index', [CommentController::class, 'index']);
     Route::get('comment/related', [CommentController::class, 'relatedComments']);
