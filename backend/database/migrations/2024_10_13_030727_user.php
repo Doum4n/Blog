@@ -20,7 +20,7 @@ return new class extends Migration
             $table->date('date_of_birth')->nullable();
             $table->string('photoUrl')->nullable();
             $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
+            $table->string('role');
             $table->integer('followers')->default(0);
             $table->string('password');
             $table->timestamps();

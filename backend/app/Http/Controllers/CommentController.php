@@ -70,8 +70,9 @@ class CommentController extends Controller
 
     public function createComment(Request $request): JsonResponse
     {
+        $comment = null;
         if($request->input('type') == 'post') {
-            Comment::factory()->createOne([
+            $comment = Comment::factory()->createOne([
                 'user_id' => $request->input('user_id'),
                 'parent_id' => $request->input('parent_id'),
                 'content' => $request->input('content'),
@@ -80,7 +81,7 @@ class CommentController extends Controller
                 'topic_id' => null,
             ]);
         }else if($request->input('type') == 'status') {
-            Comment::factory()->createOne([
+            $comment = Comment::factory()->createOne([
                 'user_id' => $request->input('user_id'),
                 'parent_id' => $request->input('parent_id'),
                 'content' => $request->input('content'),
@@ -89,7 +90,7 @@ class CommentController extends Controller
                 'topic_id' => null,
             ]);
         }else if ($request->input('type') == 'topic') {
-            Comment::factory()->createOne([
+            $comment = Comment::factory()->createOne([
                 'user_id' => $request->input('user_id'),
                 'parent_id' => $request->input('parent_id'),
                 'content' => $request->input('content'),
@@ -99,7 +100,7 @@ class CommentController extends Controller
             ]);
         }
 
-        return response()->json('Comment created!');
+        return response()->json($comment);
     }
 
     public function getCommentByUserId(string $userId): JsonResponse

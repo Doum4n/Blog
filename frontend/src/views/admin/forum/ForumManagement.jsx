@@ -2,7 +2,7 @@ import {Col, Container, Form, Image, Row, Table} from "react-bootstrap";
 import * as React from 'react';
 import SideBar from "../sidebar/sidebar";
 import NavBar from "../navbar/navbar";
-import {forwardRef, useEffect, useRef, useState} from "react";
+import {createRef, forwardRef, useEffect, useRef, useState} from "react";
 import { set } from "firebase/database";
 import {
     Checkbox,
@@ -32,6 +32,7 @@ import FormControl from '@mui/material/FormControl';
 import PropTypes from 'prop-types';
 import Comment from "../../client/component/comment";
 import { setStyleProp } from "html-react-parser/lib/utilities";
+import CreateForum_modal from "./createForum_modal.jsx";
 
 const Forum = () => {
     const [topics, setTopics] = useState([]);
@@ -462,6 +463,8 @@ const Forum = () => {
         );
     }
 
+    const createForumModalRef = createRef();
+
     return (
         <Container fluid className="mt-3">
             <Row>
@@ -503,6 +506,11 @@ const Forum = () => {
 
                         <div>
                             <Button variant="contained">Export</Button>
+                        </div>
+
+                        <div>
+                            <Button variant="contained" onClick={() => createForumModalRef.current.handleOpen()}>Create</Button>
+                            <CreateForum_modal ref={createForumModalRef} />
                         </div>
 
                     </div>

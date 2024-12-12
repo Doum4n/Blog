@@ -4,7 +4,7 @@ import SubComment from "./subcoment";
 import { useState } from "react";
 import {useNavigate} from "react-router-dom";
 
-const Comment = ({ImageSrc,updated_at, nameUser, comment, id, type, disableReply}) => {
+const Comment = ({ImageSrc,updated_at, nameUser, comment, id, type, disableReply, onNewSubComment}) => {
 
     const [showSubComment, setShowSubComment] = useState(false);
 
@@ -48,6 +48,8 @@ const Comment = ({ImageSrc,updated_at, nameUser, comment, id, type, disableReply
                                     comment='content'
                                     parent_id={id}
                                     type={type}
+                                    onNewSubComment={onNewSubComment}
+                                    onClose={() => setShowSubComment(false)}
                                 />
                             </div>
                         )}

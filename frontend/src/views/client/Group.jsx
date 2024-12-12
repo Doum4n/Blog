@@ -12,7 +12,7 @@ import '../../../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import statusRes from "assert";
 import Status from "./component/status/status.jsx";
 import Button from "@mui/material/Button";
-import {Divider} from "@mui/material";
+import {Divider, TextField} from "@mui/material";
 
 const Group = () => {
 
@@ -22,6 +22,8 @@ const Group = () => {
     const [group, setGroup] = useState({});
     const [groups4, setGroups4] = useState([]);
 
+    const [myUuid, setMyUuid] = useState();
+
     const {id} = useParams();
 
     useEffect(() => {
@@ -29,6 +31,7 @@ const Group = () => {
             auth.onAuthStateChanged(function (user) {
                 if (user) {
                     setPhotoUrl(user.photoURL);
+                    setMyUuid(user.uid);
                 }
             });
         } catch (err) {
@@ -75,6 +78,37 @@ const Group = () => {
         getPostById();
     }, [id]);
 
+    const onFollow_Click = () => {
+        fetch(`http://0.0.0.0/follow`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                user_id : myUuid,
+                group_id: id,
+                type: "group",
+            })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data);
+                console.log(myUuid + " " );
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+    }
+
+    const onPost_Click = () => {
+
+    }
+
     return (
         <Container className="d-flex flex-column w-75">
             <div className="d-flex flex-column">
@@ -95,14 +129,15 @@ const Group = () => {
                     </div>
                 </div>
                 <div style={{marginLeft: 'auto'}}>
-                    <Button variant="contained">Follow</Button>
+                    <Button variant="contained" onClick={onFollow_Click}>Follow</Button>
                 </div>
             </div>
 
             <Row>
                 <Col md={3} style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
-                <div style={{height: '400px', width: '100%', backgroundColor: 'gray'}}>
-
+                <div style={{height: '400px', width: '100%', backgroundColor: 'gray', padding: '10px'}}>
+                    <h4>Description</h4>
+                    {group.description}
                     </div>
                     <div>
                         <h2>Groups</h2>
@@ -163,10 +198,10 @@ const Group = () => {
                                 More
                             </Button>
                         </div>
-
                     </div>
                 </Col>
                 <Col md={9}>
+                    <Button variant="contained" onClick={() => navigate(`/post/upload/group/${id}`)}>Post</Button>
                     <h2>Postes</h2>
                     {posts.map((post) => (
                         <Post_by_user

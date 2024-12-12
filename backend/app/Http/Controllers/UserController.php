@@ -7,11 +7,15 @@ use App\Models\User;
 use http\Env\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Kreait\Firebase\Contract\Auth;
 use Kreait\Firebase\Exception\AuthException;
 use Kreait\Firebase\Exception\DatabaseException;
 use Kreait\Firebase\Exception\FirebaseException;
 use Kreait\Laravel\Firebase\Facades\Firebase;
+use Illuminate\Support\Facades\Session;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 class UserController extends Controller
 {
@@ -60,11 +64,13 @@ class UserController extends Controller
 
     public function createUser(Request $request): JsonResponse
     {
-        User::factory()->createOne([
+        User::query()->create([
            'uuid' => $request->input('id'),
            'name' => $request->input('name'),
            'email' => $request->input('email'),
             'photoUrl' => $request->input('photoUrl'),
+            'role' => $request->input('role'),
+            'password' => Hash::make($request->input('password')),
         ]);
 
         return response()->json('Create user successfully!');
@@ -75,7 +81,7 @@ class UserController extends Controller
         $users = User::query()
             ->join('followings', 'users.uuid', '=', 'followings.followed_user_id') // Liên kết với người dùng được theo dõi
             ->where('followings.user_id', $uuid) // Điều kiện: user_id là UUID của người dùng đang theo dõi
-            ->select('users.name', 'users.photoUrl') // Lấy thông tin của người dùng được theo dõi
+            ->select('users.uuid','users.name', 'users.photoUrl') // Lấy thông tin của người dùng được theo dõi
             ->get();
 
         return response()->json($users);
@@ -88,14 +94,39 @@ class UserController extends Controller
         return response()->json($photo);
     }
 
-    public function updatePhoto(Request $request): JsonResponse
+    public function updateUser(Request $request): JsonResponse
     {
-        User::query()
+        // Lấy dữ liệu từ request, loại bỏ các giá trị null hoặc rỗng
+        $data = array_filter($request->only([
+            'photoUrl',
+            'name',
+            'age',
+            'gender',
+            'biography',
+            'email',
+            'date_of_birth',
+        ]), function ($value) {
+            return !is_null($value) && $value !== ''; // Chỉ giữ lại các giá trị không rỗng
+        });
+
+        // Kiểm tra nếu không có dữ liệu nào để cập nhật
+        if (empty($data)) {
+            return response()->json('No data to update.', 400);
+        }
+
+        // Cập nhật vào cơ sở dữ liệu
+        $affectedRows = User::query()
             ->where('uuid', $request->input('id'))
-            ->update(['photoUrl' => $request->input('photoUrl'),
-        ]);
-        return response()->json('Create user photo successfully!');
+            ->update($data);
+
+        // Kiểm tra nếu không tìm thấy người dùng
+        if ($affectedRows === 0) {
+            return response()->json('User not found or no changes made.', 404);
+        }
+
+        return response()->json('Update user successfully!');
     }
+
 
     public function index(): JsonResponse
     {
@@ -121,4 +152,34 @@ class UserController extends Controller
 
         return response()->json('Deleted successfully', 200);
     }
+
+    public function validateAccount()
+    {
+        $account = User::query()
+            ->where('name', request()->input('name'))
+            ->where('password', request()->input('password'))
+            ->first();
+        if(!$account) {
+            return response()->json('User not found', 404);
+        }else{
+             session()->put(['uuid' => $account->uuid]);
+            return response()->json('validated', 200);
+        }
+    }
+
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
+    public function getCurrentUser(): JsonResponse
+    {
+        $userId = session()->get('uuid');
+        if (!$userId) {
+            return response()->json('Unauthorized', 401);
+        }
+
+        $user = User::query()->where('uuid', $userId)->first();
+        return response()->json($user);
+    }
+
 }

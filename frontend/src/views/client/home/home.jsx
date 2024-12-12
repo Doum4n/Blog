@@ -6,21 +6,21 @@ import { Card } from 'react-bootstrap';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import { Nav } from 'react-bootstrap';
-import banner from '../../assets/banner.png';
+import banner from '../../../assets/banner.png';
 import axios from 'axios';
-import Post from './component/post';
+import Post from '../component/post.jsx';
 import { ListGroup } from 'react-bootstrap';
-import SubPost from './component/sub_post';
+import SubPost from '../component/sub_post.jsx';
 import { useNavigate } from 'react-router-dom';
-import PostForum from './component/topic/post_forum.jsx';
-import '../../../node_modules/bootstrap/dist/css/bootstrap.min.css';
-import Status from "./component/status/status.jsx";
+import PostForum from '../component/topic/post_forum.jsx';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import Status from "../component/status/status.jsx";
 import {Box, Divider, Modal} from "@mui/material";
-import SubComment from "./component/subcoment.jsx";
+import SubComment from "../component/subcoment.jsx";
 import Button from "@mui/material/Button";
-import {auth} from "../../config/firebase.js";
-import Topic from "./component/topic/topic.jsx";
-import PostStatus from "./service/UserPostStatus.jsx";
+import {auth} from "../../../config/firebase.js";
+import Topic from "../component/topic/topic.jsx";
+import PostStatus from "../service/UserPostStatus.jsx";
 
 function Home() {
   const post =
@@ -118,7 +118,7 @@ function Home() {
       fetch('http://0.0.0.0/post/forum/5'),
       fetch('http://0.0.0.0/status/index'),
       fetch('http://0.0.0.0/users/index'),
-      fetch('http://0.0.0.0/posts/hashtag/1'),
+      fetch('http://0.0.0.0/posts/hashtag/2'),
       fetch('http://0.0.0.0/group/top4'),
       fetch('http://0.0.0.0/topics/index'),
     ])
@@ -198,14 +198,16 @@ function Home() {
 
   return (
       <>
-        <Container>
+        <Container style={{backgroundColor: 'fff4e9'}}>
           <Row>
             <div style={{display: 'flex', flexDirection: 'row', gap: '10px', overflowX: 'auto'}}>
-              <div onClick={() => postStatusRef.current.handleOpen()} className="bg-secondary d-flex justify-content-center align-items-center" style={{height: '200px', width: '150px', borderRadius: '10px'}} >
+              <div onClick={() => postStatusRef.current.handleOpen()}
+                   className="bg-secondary d-flex justify-content-center align-items-center"
+                   style={{height: '200px', width: '150px', borderRadius: '10px'}}>
                 <h1 style={{fontSize: '40px'}}>
                   +
                 </h1>
-                <PostStatus userId={userId} ref={postStatusRef}  />
+                <PostStatus userId={userId} ref={postStatusRef}/>
               </div>
               {statuses.map((status) => (
                   <Status
@@ -320,13 +322,14 @@ function Home() {
               <Row>
                 <h2 className='mb-4'>Popular</h2>
                 {PopularPosts.map((post) => {
-                  return (<Col md={6} className='mb-3' style={{ float: 'left' }} key={post.id} onClick={() => PopularHandlerClick(post.id)}>
+                  return (<Col md={6} className='mb-3' style={{float: 'left'}} key={post.id}
+                               onClick={() => PopularHandlerClick(post.id)}>
                     <Row>
                       <Col md="auto" className='d-flex align-items-center'>
                         <h2><b>#{index++}</b></h2>
                       </Col>
                       <Col className='d-flex align-items-center'>
-                        <div style={{ width: '95%', border: 'thin solid black', padding: '10px', borderRadius: '5px' }}>
+                        <div style={{width: '95%', border: 'thin solid black', padding: '10px', borderRadius: '5px'}}>
                           <h4>{post.title}</h4>
                           <h4>{post.text}</h4>
                         </div>
@@ -342,15 +345,24 @@ function Home() {
               {/* Featured posts */}
               <h2>Featured Posts</h2>
               {isLoading ? "Loading..." : FeaturedPosts.length > 0 ? (
-                  <div style={{display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center', backgroundColor: 'gray', padding: '20px', paddingTop: '20px'}}>
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '10px',
+                    alignItems: 'center',
+                    backgroundColor: 'gray',
+                    padding: '20px',
+                    paddingTop: '20px'
+                  }}>
                     <img src={FeaturedPosts[0].image_path} alt={post.title} style={{width: '60%'}}/>
                     {FeaturedPosts[0].title}
                   </div>
               ) : "No post found"}
               <div style={{display: 'flex', flexDirection: 'row', gap: '2px', overflowX: 'auto'}}>
                 {FeaturedPosts.map((post) => (
-                    <div key={post.id} style={{width:'300px', flexShrink: 0}} onClick={() => navigate(`/post/${post.id}`)}>
-                      <img src={post.image_path} alt={post.title} style={{ width: '100%' }} />
+                    <div key={post.id} style={{width: '300px', flexShrink: 0}}
+                         onClick={() => navigate(`/post/${post.id}`)}>
+                      <img src={post.image_path} alt={post.title} style={{width: '100%'}}/>
                       {post.title}
                     </div>
                 ))}
@@ -506,22 +518,6 @@ function Home() {
                 <div className="bg-dark" onClick={() => onMoreRecentPost_Click()}>ds</div>
                 {/*  */}
               </div>
-              <div>
-                {/*Influencers*/}
-                <Col className="d-flex gap-2 flex-column">
-                  <h1>Influencer</h1>
-                  {users.map((user) => (
-                      <div className="d-flex gap-2 flex-row align-items-center" onClick={() => navigate(`/user/${user.uuid}`)}>
-                        <img src={user.photoUrl} style={{height: '60px', width: '60px', borderRadius: '50%'}}/>
-                        <h3>{user.name}</h3>
-                      </div>
-                  ))}
-                </Col>
-                {/*  */}
-              </div>
-
-              <Divider/>
-
               {/*Groups*/}
               <div>
                 <div className="sticky-top" style={{
@@ -583,6 +579,23 @@ function Home() {
                     More
                   </Button>
                 </div>
+                {/*  */}
+              </div>
+
+              <Divider/>
+
+              <div>
+                {/*Influencers*/}
+                <Col className="d-flex gap-2 flex-column">
+                  <h1>Influencer</h1>
+                  {users.map((user) => (
+                      <div className="d-flex gap-2 flex-row align-items-center"
+                           onClick={() => navigate(`/user/${user.uuid}`)}>
+                        <img src={user.photoUrl} style={{height: '60px', width: '60px', borderRadius: '50%'}}/>
+                        <h3>{user.name}</h3>
+                      </div>
+                  ))}
+                </Col>
                 {/*  */}
               </div>
             </Col>

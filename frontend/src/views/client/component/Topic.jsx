@@ -1,11 +1,12 @@
 import {Col, Container, Form, Row} from "react-bootstrap";
 import {useParams} from "react-router-dom";
 import {useEffect, useRef, useState} from "react";
-import {Chip, Divider} from "@mui/material";
+import {Chip, Divider, Menu, MenuItem, Modal, TextField} from "@mui/material";
 import Button from "@mui/material/Button";
 import Comment from "./comment.jsx";
 import * as React from "react";
 import {auth} from "../../../config/firebase.js";
+import PostsByTopic from "../PostsByTopic.jsx";
 
 const Topic = () => {
     const [topic, setTopic] = useState({});
@@ -15,6 +16,8 @@ const Topic = () => {
     const [userId, setUserId] = useState(null);
     const [loading, setLoading] = useState(true);
     let [tags, setTags] = useState([]);
+
+    const FormTags = useRef(null);
 
     const {id} = useParams();
 
@@ -70,7 +73,7 @@ const Topic = () => {
                 body: JSON.stringify({
                     user_id: userId,
                     id: id,
-                    content: FormRef.current.element.comment.value,
+                    content: FormRef.current.elements.comment.value,
                     parent_id: null,
                     type: "topic",
                 })
@@ -88,17 +91,112 @@ const Topic = () => {
             });
     }
 
+    const onFollow_Click = () => {
+        fetch(`http://0.0.0.0/follow`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                user_id : userId,
+                topic_id : id,
+                type: "group",
+            })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data);
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+    }
+
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    const open = Boolean(anchorEl);
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
+    const onEditTags_Click = () => {
+        fetch('http://0.0.0.0/topic/tags/update/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                topic_id: id,
+                tag_name: FormTags.current.elements.tags.value,
+            })
+        }).then(response => {
+            if (!response.ok) throw new Error('Cant delete post');
+            return response.json();
+        })
+            .then(data => {
+                console.log(data);
+            })
+            .catch(error => console.error('There was a problem with the fetch operation:', error));
+    }
+
+    const onDeleteTags_Click = () => {
+        fetch('http://0.0.0.0/topics/delete', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                topics: [id],
+            })
+        }).then(response => {
+            if (!response.ok) throw new Error('Cant delete post');
+            return response.json();
+        })
+            .then(data => {
+                console.log('deleted');
+            })
+            .catch(error => console.error('There was a problem with the fetch operation:', error));
+    }
+
+    const [showChoseTags, setShowChoseTags] = useState(false);
+    const handleChoseTagsOpen = () => setShowChoseTags(true);
+    const handleChoseTagsClose = () => setShowChoseTags(false);
+
+    const style = {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: 700,
+        height: 300,
+        backgroundColor: 'white',
+        border: '2px solid #000',
+        boxShadow: 24,
+        padding: 20,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '10px',
+    };
+
     return (
         <Container>
             <Row>
                 <Col md={2}>
-                    <div style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
+                    <div style={{display: 'flex', flexDirection: 'column', gap: '10px', width: '100%'}}>
                         {topic.username}
                         <br/>
                         {new Date(topic.created_at).toLocaleString()}
                         <Divider/>
                         <h4>Follower: {topic.followers}</h4>
-                        <Button variant="outlined">Follow</Button>
+                        <Button variant="outlined" onClick={onFollow_Click}>Follow</Button>
                         <Divider/>
                         <h4>Tags</h4>
                         <div style={{display: 'flex', flexDirection: 'row', gap: '5px', width: '100%'}}>
@@ -111,7 +209,38 @@ const Topic = () => {
 
                 <Col md={7}>
                     <div style={{display: 'flex', flexDirection: 'column'}}>
-                        <h1>{topic.title}</h1>
+                        <div className="d-flex flex-row align-items-center">
+                            <h1>{topic.title}</h1>
+                            <div>
+                                <Button variant="contained" onClick={handleClick}>Edit</Button>
+                                <Menu
+                                    id="basic-menu"
+                                    anchorEl={anchorEl}
+                                    open={open}
+                                    onClose={handleClose}
+                                >
+                                    <MenuItem onClick={handleChoseTagsOpen}>Tags</MenuItem>
+                                    <MenuItem onClick={onDeleteTags_Click}>Delete</MenuItem>
+                                    <MenuItem >Edit</MenuItem>
+                                </Menu>
+                            </div>
+                        </div>
+                        {/* Edit tags */}
+                        <div>
+                            <Modal
+                                open={showChoseTags}
+                                onClose={handleChoseTagsClose}
+                            >
+                                <box style={style}>
+                                    <Form ref={FormTags} style={{display: 'flex', flexDirection: 'column', gap: '5px'}}>
+                                        <TextField name="tags" label="Tags" defaultValue={topic.tag_name} />
+                                        <Button variant="contained" onClick={onEditTags_Click}>Edit</Button>
+                                    </Form>
+                                </box>
+
+                            </Modal>
+                        </div>
+
                         <div>
                             {topic.open === 1 ? (
                                 <Chip label='open' color="primary"/>
@@ -120,8 +249,12 @@ const Topic = () => {
                             )}
                         </div>
                         <p>{topic.content}</p>
+
+                        {loading ? "Loading..." : topic.image_path ? topic.image_path.split(',').map(url => (
+                            <img key={url} src={url}/>
+                        )) : null}
                     </div>
-                    <Divider />
+                    <Divider/>
                     <div style={{display: 'flex', flexDirection: 'row', alignItems: 'end', justifyContent: 'end', gap: 10, marginTop: 10, marginBottom: 10}}>
                         <Button variant="contained">Like</Button>
                         <Button variant="contained">Comment</Button>
@@ -168,9 +301,8 @@ const Topic = () => {
                 <Col md={2}>
                     <div style={{display: 'flex', flexDirection: 'column', gap: 10, marginTop: 10, marginBottom: 10}}>
                         {recentTopics.map((recentTopic) => (
-                            <div key={recentTopic.id} style={{display: 'flex', flexDirection: 'row'}}>
-                                {recentTopic.title}
-                                <img src={recentTopic.image_path} alt={recentTopic.title} style={{ width: '100%' }} />
+                            <div key={recentTopic.id} style={{display: 'flex', flexDirection: 'row', width: '100%', overflowX: 'auto'}}>
+
                             </div>
                         ))}
                     </div>

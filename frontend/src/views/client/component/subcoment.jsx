@@ -4,7 +4,7 @@ import { Image, Form } from "react-bootstrap";
 import { auth } from "../../../config/firebase";
 import { useParams } from "react-router-dom";
 
-const SubComment = ({ImageSrc, nameUser, parent_id, type}) => {
+const SubComment = ({ImageSrc, nameUser, parent_id, type, onNewSubComment, onClose}) => {
     const [content, setContent] = useState('');
     const { id } = useParams();
     const [user_id, setUserId]  = useState('');
@@ -26,32 +26,46 @@ const SubComment = ({ImageSrc, nameUser, parent_id, type}) => {
       });
 
     const postComment = async () => {
-        await fetch(`http://0.0.0.0/comment/create`,
-            {
+        try {
+            const response = await fetch(`http://0.0.0.0/comment/create`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type' : 'application/json',
+                    'Content-Type': 'application/json',
                 },
-                body: JSON.stringify ({
+                body: JSON.stringify({
                     user_id: user_id,
                     id: id,
                     content: content,
-                    parent_id: parent_id,
+                    parent_id: parent_id, // Gắn parent_id để xác định sub-comment
                     type: type,
-                })
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error("Can't post this comment!");
             }
-        )
-            .then(response => {
-                if(!response.ok){
-                    throw new Error("Cant post this comment!")
-                }
-                return response.json();
-            }).then(data => {
-                console.log(data);
-            }).catch(err => {
-                console.error(err);
-        });
-    }
+
+            const newComment = await response.json();
+
+            // Gửi dữ liệu sub-comment mới lên component cha
+            if (onNewSubComment) {
+                onNewSubComment({
+                    ...newComment,
+                    user_name: username,
+                    avatar: photoUrl,
+                });
+            }
+
+            if(onClose){
+                onClose();
+            }
+
+            // Reset nội dung sau khi gửi thành công
+            setContent('');
+        } catch (err) {
+            console.error(err);
+        }
+    };
 
     const commentChange = (e) => {
         setContent(e.target.value);

@@ -21,6 +21,8 @@ class TopicController extends Controller
             ->join('images', 'topics.id', '=', 'images.topic_id', 'left')
             ->groupBy('topics.id', 'users.uuid', 'users.name')
             ->select('topics.*', 'users.name as username', 'users.uuid as userId')
+            ->where('open', 1)
+            ->orderByDesc('created_at')
             ->paginate(10);
 
         return response()->json($topics);
@@ -79,7 +81,7 @@ class TopicController extends Controller
     public function createTopic(Request $request): JsonResponse
     {
         // Tạo bài viết
-        $topic = Topic::factory()->createOne([
+        $topic = Topic::query()->create([
             'title' => $request->get('title'),
             'content' => $request->input('content'),
             'user_id' => $request->input('user_id'),
@@ -110,5 +112,76 @@ class TopicController extends Controller
         }
 
         return response()->json(['id' => $topic->id], 200);
+    }
+
+    public function getTopicsByUserId(string $userId): JsonResponse
+    {
+        $topics = Topic::query()
+            ->where('user_id', $userId)
+            ->where('open', 1)
+            ->paginate(10);
+
+        return response()->json($topics);
+    }
+
+    public function updateTopic(Request $request): JsonResponse
+    {
+        Topic::query()
+            ->find($request->input('id'))
+        ->update([
+            'title' => $request->input('title'),
+            'content' => $request->input('content'),
+            'user_id' => $request->input('user_id'),
+            'open' => $request->input('open'),
+        ]);
+
+        return response()->json('success');
+    }
+
+    public function updateTags(Request $request): JsonResponse
+    {
+        $tagNames = explode(',', $request->input('tag_name'));
+        $topic_id = $request->input('topic_id');
+
+        // Lấy danh sách tên thẻ hiện tại của bài đăng
+        $topicTags = TopicTag::query()
+            ->where('topic_id', $topic_id)
+            ->join('tags', 'topic_tag.tag_id', '=', 'tags.id')
+            ->pluck('tags.name')
+            ->toArray();
+
+        // Kiểm tra nếu danh sách không thay đổi
+        if (empty(array_diff($tagNames, $topicTags)) && empty(array_diff($topicTags, $tagNames))) {
+            return response()->json("Nothing to update");
+        }
+
+        // Lấy các thẻ cần thêm và cần xóa
+        $tagsToAdd = array_diff($tagNames, $topicTags); // Các thẻ mới cần thêm
+        $tagsToRemove = array_diff($topicTags, $tagNames); // Các thẻ hiện tại cần xóa
+
+        // Xóa các thẻ không còn trong danh sách
+        foreach ($tagsToRemove as $tagName) {
+            $tag = Tag::query()->where('name', $tagName)->first();
+            if ($tag) {
+                TopicTag::query()
+                    ->where('topic_id', $topic_id)
+                    ->where('tag_id', $tag->id)
+                    ->delete();
+            }
+        }
+
+        // Thêm các thẻ mới
+        foreach ($tagsToAdd as $tagName) {
+            $tagName = trim($tagName); // Loại bỏ khoảng trắng
+            $tag = Tag::query()->firstOrCreate(['name' => $tagName]); // Tìm hoặc tạo thẻ mới
+
+            // Tạo liên kết giữa bài đăng và thẻ
+            TopicTag::query()->firstOrCreate([
+                'topic_id' => $topic_id,
+                'tag_id' => $tag->id,
+            ]);
+        }
+
+        return response()->json('success', 200);
     }
 }

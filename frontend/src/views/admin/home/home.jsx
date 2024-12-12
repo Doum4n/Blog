@@ -2,8 +2,9 @@ import { Col, Container, Row } from "react-bootstrap";
 import NavBar from "../navbar/navbar";
 import SideBar from "../sidebar/sidebar";
 import './home.css';
-import { useEffect, useState } from "react";
+import {useEffect, useRef, useState} from "react";
 import { CssBaseline } from '@mui/material';
+import { LineChart } from '@mui/x-charts/LineChart';
 
 const DashBoard = () => {
     const [users, setUsers] = useState();
@@ -11,6 +12,8 @@ const DashBoard = () => {
     const [views, setView] = useState();
     const [likes, setLikes] = useState();
     const [comments, setComments] = useState();
+
+    let [viewsByDay, setViewsByDay] = useState([]);
 
     useEffect(() => {
         fetch('http://0.0.0.0/statistical')
@@ -28,6 +31,17 @@ const DashBoard = () => {
             .catch(error => console.error('Fetch error:', error));
     }, []);
 
+    useEffect(() => {
+        const fetchData = async () => {
+            const views = await fetch(`http://0.0.0.0/statistical/viewsByDay`).then(res => res.json());
+            setViewsByDay(views);
+
+            console.log(views);
+        }
+
+        fetchData();
+    }, []);
+
     return (
         <Container fluid className="mt-3">
             <Row>
@@ -36,6 +50,18 @@ const DashBoard = () => {
                 </Col>
                 <Col md={10}>
                     <NavBar />
+
+                    {/*<h2></h2>*/}
+                    {/*<LineChart*/}
+                    {/*    xAxis={[{ label: 'Chart view by day', data: [1, 2, 3, 4, 5, 6, 7, 8] }]}*/}
+                    {/*    series={[*/}
+                    {/*        {*/}
+                    {/*            data: Object.values(viewsByDay),*/}
+                    {/*        },*/}
+                    {/*    ]}*/}
+                    {/*    width={500}*/}
+                    {/*    height={300}*/}
+                    {/*/>*/}
 
                     {/* Hàng đầu tiên */}
                     <Row className="bg-black text-white p-4 ms-3 justify-content-around">

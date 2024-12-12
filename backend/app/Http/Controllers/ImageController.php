@@ -27,7 +27,7 @@ class ImageController extends Controller
 //        $temporaryImages[] = $image;
 //        session(['temporary_images' => $temporaryImages]);
 
-        return response()->json(['path' => $path]);
+        return response()->json(['path' => 'http://0.0.0.0/storage/' . $path]);
     }
 
     public function store(Request $request): JsonResponse
@@ -41,7 +41,7 @@ class ImageController extends Controller
                     'status_id' => $request->input('status_id'),
                     'post_id' => $request->input('post_id'),
                     'topic_id' => $request->input('topic_id'),
-                    'path' => $path
+                    'path' => 'http://0.0.0.0/storage/'.$path
                 ]);
                 $createdPaths[] = $image->path;
             }

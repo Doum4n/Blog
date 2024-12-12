@@ -8,6 +8,7 @@ import Select from '@mui/material/Select';
 import FormControl from '@mui/material/FormControl';
 import ModalComponent from "../component/post_modal.jsx";
 import {useState, useEffect} from "react";
+import {useNavigate} from "react-router-dom";
 
 const Post = () => {
     const [posts, setPosts] = useState([]);
@@ -17,6 +18,8 @@ const Post = () => {
     const [showFilter, setShowFilter] = useState(false);
 
     const [selectedPost, setSelectedPost] = useState([]);
+
+    const navigate = useNavigate();
 
     const handleChange = (event) => {
         setAction(event.target.value);
@@ -308,7 +311,7 @@ const Post = () => {
                 </Col>
                 <Col md={10}>
                     <NavBar />
-                    <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+                    <div className="align-items-center" style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
                         <div>
                             <FormControl sx={{ m: 1, width: 300 }}>
                                 <InputLabel id="checkbox-label">Tag</InputLabel>
@@ -332,7 +335,7 @@ const Post = () => {
                             </FormControl>
                         </div>
 
-                        <div style={{ height: '10px' }}>
+                        <div>
                             <Button variant="contained" onClick={onFillterClick}>Fillter</Button>
                             {showFilter && (
                                 <FillterPopper/>
@@ -341,6 +344,10 @@ const Post = () => {
 
                         <div>
                             <Button variant="contained">Export</Button>
+                        </div>
+
+                        <div>
+                            <Button variant="contained" onClick={() => navigate('/post/upload')}>Create</Button>
                         </div>
 
                     </div>

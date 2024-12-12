@@ -20,8 +20,9 @@ class User extends Model
         'date_of_birth',
         'photoUrl',
         'email',
-        'email_verified_at',
+        'role',
         'followers',
+        'password',
     ];
 
     protected $hidden = [

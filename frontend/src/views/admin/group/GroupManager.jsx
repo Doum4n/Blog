@@ -7,7 +7,8 @@ import Button from '@mui/material/Button';
 import Select from '@mui/material/Select';
 import FormControl from '@mui/material/FormControl';
 import ModalComponent from "../component/group_modal.jsx";
-import {useState, useEffect} from "react";
+import {useState, useEffect, createRef} from "react";
+import CreateGroup_modal from "./createGroup_modal.jsx";
 
 const Group = () => {
     const [groups, setGroups] = useState([]);
@@ -310,6 +311,8 @@ const Group = () => {
         );
     }
 
+    const createGroupRef = createRef();
+
     return (
         <Container fluid className="mt-3">
             <Row>
@@ -351,6 +354,11 @@ const Group = () => {
 
                         <div>
                             <Button variant="contained">Export</Button>
+                        </div>
+
+                        <div>
+                            <Button variant="contained" onClick={() => createGroupRef.current.handleOpen()}>Create</Button>
+                            <CreateGroup_modal ref={createGroupRef} />
                         </div>
 
                     </div>

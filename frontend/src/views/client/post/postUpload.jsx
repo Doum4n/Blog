@@ -6,9 +6,10 @@ import Editor from './Editor';
 import { useEffect } from 'react';
 import Quill from 'quill/dist/quill.js';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import {useNavigate, useParams} from 'react-router-dom';
 import { auth } from '../../../config/firebase';
 import {Box, InputLabel, MenuItem, Modal} from "@mui/material";
+// import '../../../../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import Select from "@mui/material/Select";
 import FormControl from '@mui/material/FormControl';
 const Delta = Quill.import('delta');
@@ -27,7 +28,7 @@ const UploadFile = () => {
   const [title, setTitle] = useState('');
   const [show, setShow] = useState(false);
   const [uuid, setUuid] = useState('');
-
+  const {id} = useParams();
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -95,6 +96,33 @@ const UploadFile = () => {
     });
   }
 
+  const UploadPostOfGroups = async () => {
+    await fetch('http://0.0.0.0/post/upload/group', {
+      method: 'POST',
+      headers: {
+        'Content-Type' : 'application/json'
+      },
+      body: JSON.stringify({
+        title : title,
+        content_post : htmlContent,
+        user_id : uuid,
+        group_id : id,
+        forum_id : FormRef.current.elements.selectedForum.value,
+        tag_name: FormRef.current.elements.TagName.value,
+      }),
+    })
+        .then((response) => response.json())
+        .then((data) =>{
+          setPostID(data.id);
+          setSumib(true);
+          handleChoseForumOpen();
+          console.log('Upload post success:', data.id);
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+  }
+
   const UploadPost = async () => {
     await fetch('http://0.0.0.0/post/create', {
       method: 'POST',
@@ -119,6 +147,7 @@ const UploadFile = () => {
     .catch((error) => {
       console.error('Error:', error);
     });
+
   }
 
   useEffect(() => {
@@ -189,6 +218,7 @@ const UploadFile = () => {
   return (
       <Container className='mt-3'>
         <Form >
+          <h2></h2>
           <Form.Control type='text' placeholder='Title' className='mb-3' onChange={(e) => setTitle(e.target.value)}/>
           <Form.Control type="file" onChange={handleFileChange} className='mb-3'/>
           {url && <img src={`http://0.0.0.0/storage/${url}`} alt="Uploaded" className='mb-3'/>}
@@ -240,7 +270,7 @@ const UploadFile = () => {
                   ))}
                 </Form.Select>
               </Form.Group>
-              <Button onClick={UploadPost}>Post</Button>
+              {id ? (<Button onClick={UploadPostOfGroups}>Post</Button>) : <Button onClick={UploadPost}>Post</Button>}
             </Form>
           </box>
 

@@ -26,7 +26,7 @@ class UserFactory extends Factory
             'date_of_birth' => $this->faker->date(),
             'photoUrl' => $this->faker->imageUrl(),
             'email' => $this->faker->unique()->safeEmail(),
-            'email_verified_at' => now(),
+            'role' => $this->faker->randomElement(['admin', 'user', 'moderator']),
             'password' => bcrypt('password'),
             'followers' => $this->faker->numberBetween(0, 50),
         ];

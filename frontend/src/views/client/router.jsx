@@ -1,6 +1,6 @@
 import {createBrowserRouter} from 'react-router-dom'
-import Home from './home.jsx';
-import UserLayout from './userLayout.jsx';
+import Home from './home/home.jsx';
+import UserLayout from './layout/userLayout.jsx';
 import GuestLayput from './guestLayout.jsx';
 import Register from './register.jsx';
 import Login from './login.jsx';
@@ -25,6 +25,9 @@ import Topic from "./component/Topic.jsx";
 import TopicManager from "../admin/topics/TopicManager.jsx";
 import GroupManager from "../admin/group/GroupManager.jsx";
 import HashTagManager from "../admin/hashtag/HashTagManager.jsx";
+import AdminLogin from "../admin/login.jsx";
+import EditPost from "./post/editPost.jsx";
+import EditTopic from "./service/EditTopic.jsx";
 const router = createBrowserRouter([
     {
         path: '/',
@@ -39,8 +42,20 @@ const router = createBrowserRouter([
                 element: <PostUpload/>
             },
             {
+                path: 'post/update/:id',
+                element: <EditPost/>
+            },
+            {
+                path: 'post/upload/group/:id',
+                element: <PostUpload/>
+            },
+            {
                 path: '/topic/:id',
                 element: <Topic/>,
+            },
+            {
+                path: '/topic/edit/:id',
+                element: <EditTopic/>
             },
             {
                 path: '/post/:id',
@@ -137,6 +152,10 @@ const router = createBrowserRouter([
     {
         path: 'admin/hashtags',
         element: <HashTagManager/>
+    },
+    {
+        path: '/admin/login',
+        element: <AdminLogin/>
     }
 ])
 

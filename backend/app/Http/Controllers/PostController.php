@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Following;
 use App\Models\Image;
 use App\Models\PostTag;
 use App\Models\Tag;
@@ -63,8 +64,25 @@ class PostController extends Controller
             }
         }
 
-        // Xóa các ảnh tạm thời nếu có
-        session()->forget('temporary_images');
+        return response()->json(['id' => $post->id], 200);
+    }
+
+    public function updatePost(Request $request): JsonResponse
+    {
+        // Tạo bài viết
+        $post = Post::query()
+            ->where('id', $request->input('post_id'))->first();
+
+        Post::query()
+            ->where('id', $request->input('post_id'))
+            ->update([
+                'title' => $request->input('title'),
+                'content' => $request->input('content_post'),
+                'user_id' => $request->input('user_id'),
+                'forum_id' => $request->input('forum_id'),
+            ]);
+
+        $this->updateTags($request);
 
         return response()->json(['id' => $post->id], 200);
     }
@@ -88,7 +106,11 @@ class PostController extends Controller
         //SELECT p.*, i.path FROM `posts` as p JOIN `images` as i on p.id = i.post_id WHERE p.id = 1
         $post = DB::table('posts')
             ->join('images', 'images.post_id', '=', 'posts.id', 'left')
-            ->select('images.path', 'posts.*')
+            ->join('forums', 'forums.id', '=', 'posts.forum_id')
+            ->join('post_tag', 'post_tag.post_id', '=', 'posts.id', 'left')
+            ->join('tags', 'tags.id', '=', 'post_tag.tag_id', 'left')
+            ->groupBy('posts.id', 'images.path', 'forum_name')
+            ->select('images.path', 'posts.*', 'forums.name as forum_name', DB::raw('GROUP_CONCAT(tags.name) as tag_name'))
             ->where('posts.id', $id)
             ->first();
 //        $post = Post::query()->join('images', 'posts.id', '=', 'images.post_id')->where('id', $id)->select()->firstOrFail();
@@ -179,8 +201,8 @@ class PostController extends Controller
 
     public function getMostViewedPosts(): JsonResponse
     {
-        $post = DB::table('images')
-            ->join('posts', 'images.post_id', '=', 'posts.id')
+        $post = DB::table('posts')
+            ->join('images', 'images.post_id', '=', 'posts.id', 'left')
             ->selectRaw('posts.*, max(images.path) as path')
             ->orderBy('posts.views', 'desc')
             ->groupBy('posts.id')
@@ -288,5 +310,127 @@ class PostController extends Controller
 
         return response()->json('Deleted successfully', 200);
     }
+
+    public function uploadPostGroup(Request $request): JsonResponse
+    {
+        // Tạo bài viết
+        $post = Post::factory()->createOne([
+            'title' => $request->get('title'),
+            'content' => $request->input('content_post'),
+            'user_id' => $request->input('user_id'),
+            'group_id' => $request->input('group_id'),
+            'forum_id' => $request->input('forum_id'),
+        ]);
+
+//        $tag_name = $request->input('$tag_name');
+        $tagNames = explode(',', $request->input('tag_name'));
+
+        foreach ($tagNames as $tagName) {
+            $tagExists = Tag::query()->where('name', trim($tagName))->exists();
+            if($tagExists) {
+                $tag = Tag::query()->where('name', trim($tagName))->select('id')->first();
+
+                PostTag::query()->create([
+                    'post_id' => $post->id,
+                    'tag_id' => $tag->id,
+                ]);
+            }else{
+                $tag = Tag::query()->create([
+                    'name' => trim($tagName),
+                    'topic_id' => 1,
+                ]);
+
+                PostTag::query()->create([
+                    'post_id' => $post->id,
+                    'tag_id' => $tag->id,
+                ]);
+            }
+        }
+
+        // Xóa các ảnh tạm thời nếu có
+        session()->forget('temporary_images');
+
+        return response()->json(['id' => $post->id], 200);
+    }
+
+    public function getRelatedPosts(Request $request): JsonResponse
+    {
+        $posts = Post::query()
+            ->join('post_tag as pt1', 'posts.id', '=', 'pt1.post_id')
+            ->join('post_tag as pt2', 'pt1.tag_id', '=', 'pt2.tag_id')
+            ->leftJoin('images', 'posts.id', '=', 'images.post_id')
+            ->where('pt2.post_id', $request->input('current_post_id')) // Match hashtags
+            ->where('posts.id', '!=', $request->input('current_post_id')) // Exclude current post
+            ->select('posts.*', DB::raw('MIN(images.path) AS image_path'))
+            ->groupBy('posts.id')
+            ->orderBy('posts.created_at', 'desc')
+            ->paginate(5);
+
+        return response()->json($posts);
+    }
+
+    public function updateTags(Request $request): JsonResponse
+    {
+        $tagNames = explode(',', $request->input('tag_name')); // Các thẻ mới
+        $post_id = $request->input('post_id');
+
+        Post::query()->where('id', $post_id)->update(['forum_id' => $request->input('forum_id')]);
+
+        // Lấy danh sách tên thẻ hiện tại của bài đăng
+        $postTags = PostTag::query()
+            ->where('post_id', $post_id)
+            ->join('tags', 'post_tag.tag_id', '=', 'tags.id')
+            ->pluck('tags.name')
+            ->toArray();
+
+        // Kiểm tra nếu danh sách không thay đổi
+        if (empty(array_diff($tagNames, $postTags)) && empty(array_diff($postTags, $tagNames))) {
+            return response()->json("Nothing to update");
+        }
+
+        // Lấy các thẻ cần thêm và cần xóa
+        $tagsToAdd = array_diff($tagNames, $postTags); // Các thẻ mới cần thêm
+        $tagsToRemove = array_diff($postTags, $tagNames); // Các thẻ hiện tại cần xóa
+
+        // Xóa các thẻ không còn trong danh sách
+        foreach ($tagsToRemove as $tagName) {
+            $tag = Tag::query()->where('name', $tagName)->first();
+            if ($tag) {
+                PostTag::query()
+                    ->where('post_id', $post_id)
+                    ->where('tag_id', $tag->id)
+                    ->delete();
+            }
+        }
+
+        // Thêm các thẻ mới
+        foreach ($tagsToAdd as $tagName) {
+            $tagName = trim($tagName); // Loại bỏ khoảng trắng
+            $tag = Tag::query()->firstOrCreate(['name' => $tagName]); // Tìm hoặc tạo thẻ mới
+
+            // Tạo liên kết giữa bài đăng và thẻ
+            PostTag::query()->firstOrCreate([
+                'post_id' => $post_id,
+                'tag_id' => $tag->id,
+            ]);
+        }
+
+        return response()->json('success', 200);
+    }
+    public function sharePost(string $uuid)
+    {
+        $posts = Post::query()
+            ->join('interactions', 'posts.id', '=', 'interactions.post_id') // Liên kết bài viết và tương tác
+            ->join('users', 'interactions.user_id', '=', 'users.uuid')      // Liên kết người dùng
+            ->where('interactions.share', 1)                                // Chỉ lấy các bài viết được chia sẻ
+            ->where('users.uuid', $uuid)                                    // Người dùng cụ thể
+            ->select('posts.*')                                             // Lấy thông tin bài viết
+            ->distinct()                                                    // Loại bỏ trùng lặp nếu có
+            ->get();
+
+        return response()->json($posts);
+    }
+
+
 
 }

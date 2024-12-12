@@ -63,9 +63,21 @@ class GroupController extends Controller
             ->join('followings', 'groups.id', '=', 'followings.group_id')
             ->join('users', 'users.uuid', '=', 'followings.user_id')
             ->where('followings.user_id', $id)
+            ->select('groups.*')
             ->take(4)
             ->get();
 
         return response()->json($groups);
+    }
+
+    public function createGroup(Request $request): JsonResponse
+    {
+        Group::query()->create([
+            'name' => $request->input('name'),
+            'description' => $request->input('description'),
+            'coverPhotoUrl' => $request->input('coverPhotoUrl'),
+        ]);
+
+        return response()->json('success');
     }
 }

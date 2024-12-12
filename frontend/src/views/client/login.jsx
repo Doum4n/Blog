@@ -1,9 +1,9 @@
 import { Container, FormControl, FormGroup, InputGroup, Alert } from "react-bootstrap"
-import React from "react";
+import React, {useRef} from "react";
 import Button from 'react-bootstrap/Button';
 import {auth} from '../../config/firebase'
 import { GoogleProvider, db } from "../../config/firebase";
-import { signInWithPopup } from "firebase/auth";
+import {signInWithEmailAndPassword, signInWithPopup} from "firebase/auth";
 import { Card } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { Form } from "react-bootstrap";
@@ -15,22 +15,30 @@ import { fetchSignInMethodsForEmail } from "firebase/auth";
 import '../../../node_modules/bootstrap/dist/css/bootstrap.min.css';
 
 const Login = () => {
-
-    const [loginStatus, setLoginStatus] = useState(null); // null, 'success' hoặc 'error'
-
     const navigate = useNavigate();
-
-    const getToken = () => {
-        auth.onAuthStateChanged(function(user){
-            console.log(user.displayName);
-            navigate('/home');
-        })
-    }
+    const FormRef = useRef(null);
 
     const RegisterHandler = () => {
         navigate('/register');
     }
 
+    const validAccount = async () => {
+        const gmail = FormRef.current.elements.email.value;
+        const password = FormRef.current.elements.password.value;
+
+        signInWithEmailAndPassword(auth, gmail, password)
+            .then(() => {
+                // Signed in
+                navigate("/home");
+                // ...
+            })
+            .catch((error) => {
+                const errorCode = error.code;
+                const errorMessage = error.message;
+
+                console.error(errorCode + " : " + errorMessage);
+            });
+    };
     
     const signInWithGoogle = async () => {
         try {
@@ -64,7 +72,7 @@ const Login = () => {
                 style={{ minHeight: "100vh" }} // Đảm bảo căn giữa theo chiều dọc
             >
                 <Card style={{ width: '300px' }} className="p-4"> {/* Thêm Card ở đây */}
-                    <Form>
+                    <Form ref={FormRef}>
                         <FormGroup>
                             <InputGroup className="mb-3">
                                 <InputGroup.Text>Gmail</InputGroup.Text>
@@ -72,6 +80,7 @@ const Login = () => {
                                     type="text"
                                     placeholder="Username"
                                     required
+                                    name="email"
                                 />
                             </InputGroup>
                             <Form.Control.Feedback type="invalid">
@@ -86,6 +95,7 @@ const Login = () => {
                                     placeholder="Password"
                                     type="password"
                                     required
+                                    name="password"
                                 />
                             </InputGroup>
                             <Form.Control.Feedback type="invalid">
@@ -94,7 +104,7 @@ const Login = () => {
                         </FormGroup>
 
                         <div className="text-end mb-3"> {/* Căn nút sang bên phải */}
-                            <Button className="me-2" variant="primary" type="sublit">Sign in</Button>
+                            <Button className="me-2" variant="primary" onClick={validAccount}>Sign in</Button>
                             <Button variant="outline-primary" onClick={RegisterHandler}>Sign up</Button>
                         </div>
                         <Button variant="link" className="w-100" onClick={signInWithGoogle}>Sign in with google</Button>

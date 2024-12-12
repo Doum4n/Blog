@@ -12,7 +12,11 @@ class PostTagController extends Controller
 {
     public function getTagsByPostId(int $id): JsonResponse
     {
-        $post = PostTag::query()->where('post_id', $id)->pluck('tag_id');
+        $post = PostTag::query()
+            ->join('tags', 'post_tag.tag_id', '=', 'tags.id')
+            ->where('post_id', $id)
+            ->select('tags.name')
+            ->get();
         return response()->json($post);
     }
 

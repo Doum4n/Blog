@@ -1,5 +1,5 @@
 import React, { Component, createRef } from 'react';
-import {Modal, Box, Button, Divider} from '@mui/material';
+import {Modal, Box, Button, Divider, Avatar} from '@mui/material';
 import {Form} from "react-bootstrap"; // Đảm bảo các thư viện được cài đặt
 
 class userInfo_modal extends Component {

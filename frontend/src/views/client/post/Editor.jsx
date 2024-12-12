@@ -114,8 +114,9 @@ const Editor = forwardRef(
 
       ref.current = quill;
 
-      if (defaultValueRef.current) {
+      if (defaultValue) {
         quill.setContents(defaultValueRef.current);
+        quill.root.innerHTML = defaultValue;
       }
 
       quill.on(Quill.events.TEXT_CHANGE, (...args) => {

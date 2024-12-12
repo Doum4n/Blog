@@ -28,6 +28,16 @@ return Application::configure(basePath: dirname(__DIR__))
             'topics/delete',
             'groups/delete',
             'topic/create',
+            'follow',
+            'post/upload/group',
+            'account/getUser',
+            'forum/create',
+            'group/create',
+            'user/update',
+            'post/tags/update',
+            'post/update',
+            'topic/update',
+            'topic/tags/update',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

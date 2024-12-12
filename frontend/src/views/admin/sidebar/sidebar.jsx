@@ -1,5 +1,6 @@
 import {Link} from 'react-router-dom'
 import './sidebar.css'
+import {Avatar} from "@mui/material";
 
 const SideBar = () => {
     return (

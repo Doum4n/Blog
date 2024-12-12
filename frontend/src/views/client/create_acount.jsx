@@ -23,28 +23,6 @@ const create_account = () => {
         });
     };
 
-    // const updateUserPhoto = async () => {
-    //     const user = await getData();
-    //     await fetch(`http://0.0.0.0/user/update/photo`, {
-    //         method: 'PUT',
-    //         headers: {
-    //             'Content-Type': 'application/json'
-    //         },
-    //         body: JSON.stringify({
-    //             id: uid,
-    //             photoUrl: user.photoURL,
-    //         })
-    //     }).then(Response => {
-    //         if (!Response.ok)
-    //             throw new Error('Cannot update user photo');
-    //         return Response.json();
-    //     }).then(data => {
-    //         console.log(data);
-    //     }).catch(err => {
-    //         console.error(err);
-    //     });
-    // }
-
     const RegisterHandler = async () => {
         const user = await getData();
         if (user && username) {
@@ -58,7 +36,8 @@ const create_account = () => {
                     id: uid,
                     name: username,
                     email: email,
-                    photoUrl: user.photoURL
+                    photoUrl: user.photoURL,
+                    role: 'user',
                 })
             }).then(Response => {
                 if (!Response.ok)

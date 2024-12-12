@@ -6,13 +6,13 @@ import { Offcanvas } from "react-bootstrap";
 import React, {createRef, useEffect, useState} from 'react';
 import { signInWithPopup, signOut } from "firebase/auth";
 import { Image } from "react-bootstrap";
-import { auth } from '../../config/firebase'
-import { GoogleProvider } from "../../config/firebase";
-import img from '../../assets/user.png';
-import '../../../node_modules/bootstrap/dist/css/bootstrap.min.css';
+import { auth } from '../../../config/firebase.js'
+import { GoogleProvider } from "../../../config/firebase.js";
+import img from '../../../assets/user.png';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import {Menu, MenuItem} from "@mui/material";
-import PostStatus from "./service/UserPostStatus.jsx";
-import PostTopic from "./service/UserPostTopic.jsx";
+import PostStatus from "../service/UserPostStatus.jsx";
+import PostTopic from "../service/UserPostTopic.jsx";
 
 const Layout = () => {
 
@@ -80,8 +80,7 @@ const Layout = () => {
   const PostTopicRef = createRef();
 
   return (
-      <>
-        <Container className="mt-2">
+      <Container className="mt-2" style={{backgroundColor: '#fff4e9'}}>
           <div className="bg-info" style={{height: '70px'}}>BANNER</div>
           <Navbar bg="light" className="border-0 bg-white mb-3">
             <Navbar.Collapse>
@@ -118,8 +117,7 @@ const Layout = () => {
             {
               <Card className="p-2 rounded-5 me-3">
                 <div className="d-flex align-items-center justify-content-between">
-                  <Image src={userPhoto} style={{ width: '50px' }} className="me-2" roundedCircle />
-                  {/* Thêm nội dung nếu cần ở đây */}
+                  <Image src={`http://0.0.0.0/storage/${userPhoto}`} style={{ width: '50px' }} className="me-2" roundedCircle />
                   <Dropdown style={{ float: 'right' }} drop="">
                     <Dropdown.Toggle className="bg-white border-0 text-dark" id="dropdown-basic" />
                     <Dropdown.Menu>
@@ -158,9 +156,8 @@ const Layout = () => {
               <Button variant="primary" onClick={LogOut}>Yes</Button>
             </Modal.Footer>
           </Modal>
-        </Container>
         <Outlet />
-      </>
+      </Container>
   )
 };
 

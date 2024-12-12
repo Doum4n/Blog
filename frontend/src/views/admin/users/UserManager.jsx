@@ -2,7 +2,7 @@ import { Col, Container, Image, Row, Table } from "react-bootstrap";
 import * as React from 'react';
 import SideBar from "../sidebar/sidebar";
 import NavBar from "../navbar/navbar";
-import { useEffect, useState } from "react";
+import {createRef, useEffect, useRef, useState} from "react";
 import { Checkbox, InputLabel, ListItemText, MenuItem, OutlinedInput, Modal, Typography, Box, Tabs, Tab, Paper, TablePagination, List, ListItem, ListItemButton, Popper, Divider, TextField, filledInputClasses } from "@mui/material";
 import Button from '@mui/material/Button';
 import Select from '@mui/material/Select';
@@ -11,6 +11,8 @@ import Comment from "../../client/component/comment";
 import SubComment from "../../client/component/subcoment";
 import Comment_by_user from '../../client/component/account/comment_by_user';
 import Post_by_user from '../../client/component/account/post_by_user';
+import Create_modal from "./create_modal.jsx";
+import Notification_modal from "../component/notification.jsx";
 
 const User = () => {
     const [users, setUsers] = useState([]);
@@ -100,31 +102,32 @@ const User = () => {
             }
 
             useEffect(() => {
-                const fetchCommentsAndPosts = async () => {
-                    try {
-                        const [commentsResponse, postsResponse] = await Promise.all([
-                            fetch(`http://0.0.0.0/comment/user/${state.selectId}`),
-                            fetch(`http://0.0.0.0/post/user/${state.selectId}`)
-                        ]);
+                if(state.selectId) {
+                    const fetchCommentsAndPosts = async () => {
+                        try {
+                            const [commentsResponse, postsResponse] = await Promise.all([
+                                fetch(`http://0.0.0.0/comment/user/${state.selectId}`),
+                                fetch(`http://0.0.0.0/post/user/${state.selectId}`)
+                            ]);
 
-                        if (!commentsResponse.ok) {
-                            throw new Error("Cant get comments by user id: " + state.selectId);
+                            if (!commentsResponse.ok) {
+                                throw new Error("Cant get comments by user id: " + state.selectId);
+                            }
+                            if (!postsResponse.ok) {
+                                throw new Error("Cant get posts by user id: " + state.selectId);
+                            }
+
+                            const commentsData = await commentsResponse.json();
+                            const postsData = await postsResponse.json();
+
+                            setComments(commentsData.comments);
+                            setPosts(postsData.post);
+                        } catch (err) {
+                            console.error(err);
                         }
-                        if (!postsResponse.ok) {
-                            throw new Error("Cant get posts by user id: " + state.selectId);
-                        }
-
-                        const commentsData = await commentsResponse.json();
-                        const postsData = await postsResponse.json();
-
-                        setComments(commentsData.comments);
-                        setPosts(postsData.post);
-                    } catch (err) {
-                        console.error(err);
-                    }
-                };
-
-                fetchCommentsAndPosts();
+                    };
+                    fetchCommentsAndPosts();
+                }
             }, [state.selectId]);
 
             useEffect(() => {
@@ -194,13 +197,25 @@ const User = () => {
                                 indicatorColor="secondary"
                                 variant="fullWidth"
                             >
+                                <Tab label="Info" />
                                 <Tab label="Posts" />
                                 <Tab label="Comments" />
                                 <Tab label="Share" />
                             </Tabs>
 
-                            {/* Posts */}
+                            {/* Info */}
                             <CustomTabPanel value={value} index={0}>
+                                <div style={{ height: 400, overflowY: 'auto' }}>
+                                    <img src={Avatar} style={{ width: '100px', height: '100px', borderRadius: '50%' }}/>
+                                    <h2>Name: {Name}</h2>
+                                    <h3>Email: {Email}</h3>
+                                    <h3>Created at: {Create_at}</h3>
+                                </div>
+                            </CustomTabPanel>
+                            {/*  */}
+
+                            {/* Posts */}
+                            <CustomTabPanel value={value} index={1}>
                                 <div style={{ height: 400, overflowY: 'auto' }}>
                                     {posts.map((post) => (
                                         <Post_by_user
@@ -218,7 +233,7 @@ const User = () => {
                             {/*  */}
 
                             {/* Comments */}
-                            <CustomTabPanel value={value} index={1}>
+                            <CustomTabPanel value={value} index={2}>
                                 <div style={{ height: 400, overflowY: 'auto' }}>
 
                                     {comments.map((comment) => {
@@ -252,7 +267,7 @@ const User = () => {
                             {/*  */}
 
                             {/* Shares */}
-                            <CustomTabPanel value={value} index={2}>
+                            <CustomTabPanel value={value} index={3}>
                                 <div style={{ overflowY: 'auto', height: '400px' }}>
                                     {sharedPosts.map((post) => (
                                         <Post_by_user
@@ -531,6 +546,9 @@ const User = () => {
         );
     }
 
+    const createAccountRef = useRef(null);
+    const notificationRef = createRef();
+
     return (
         <Container fluid className="mt-3">
             <Row>
@@ -573,6 +591,13 @@ const User = () => {
                         <div>
                             <Button variant="contained">Export</Button>
                         </div>
+
+                        <div>
+                            <Create_modal ref={createAccountRef}/>
+                            <Button variant="contained" onClick={() => createAccountRef.current.handleOpen()}>Create</Button>
+                        </div>
+
+                        <Notification_modal title="Notification" message={"Create user successfully"} ref={notificationRef}/>
 
                     </div>
                     <Table striped bordered hover>
